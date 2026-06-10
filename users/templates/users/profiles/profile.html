@@ -1,0 +1,112 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Perfil — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Perfil</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0">
+        <i class="bi bi-person-circle me-2"></i>Perfil
+    </h5>
+    <div class="d-flex gap-2">
+        <a href="{% url 'user-profile-update' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-pencil me-1"></i>Atualiza Perfil
+        </a>
+        <a href="{% url 'user-profile-password' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-key me-1"></i>Muda Password
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Account card -->
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex
+                            align-items-center justify-content-center mb-3"
+                     style="width:100px;height:100px;font-size:2.5rem;">
+                    {{ request.user.get_full_name|default:request.user.username|first|upper }}
+                </div>
+                <h6 class="fw-bold mb-1">{{ request.user.get_full_name|default:request.user.username }}</h6>
+                <small class="text-muted">@{{ request.user.username }}</small>
+                <div class="mt-2">
+                    {% for group in request.user.groups.all %}
+                    <span class="badge bg-primary">{{ group.name }}</span>
+                    {% empty %}
+                    <span class="badge bg-secondary">Sem papel</span>
+                    {% endfor %}
+                    {% if request.user.is_superuser %}
+                    <span class="badge bg-danger">Superuser</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account info -->
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-white fw-semibold">Informasaun Konta</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Username</dt>
+                    <dd class="col-sm-8">{{ request.user.username }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Naran Primeiru</dt>
+                    <dd class="col-sm-8">{{ request.user.first_name|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Naran Ikus</dt>
+                    <dd class="col-sm-8">{{ request.user.last_name|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Email</dt>
+                    <dd class="col-sm-8">{{ request.user.email|default:"—" }}</dd>
+                </dl>
+            </div>
+        </div>
+
+        {% if professor_user %}
+        <div class="card shadow-sm">
+            <div class="card-header bg-white fw-semibold">Informasaun Funcionario</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Naran</dt>
+                    <dd class="col-sm-8">{{ professor_user.professor.nome }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Pozisaun</dt>
+                    <dd class="col-sm-8">{{ professor_user.professor.get_posisaun_prof_display|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">N.º EMIS</dt>
+                    <dd class="col-sm-8">{{ professor_user.professor.emis_prof|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">N.º Funcionario</dt>
+                    <dd class="col-sm-8">{{ professor_user.professor.numero_funcionario|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Nivel Akademiku</dt>
+                    <dd class="col-sm-8">{{ professor_user.professor.get_nivel_akademiku_display }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Kontatu</dt>
+                    <dd class="col-sm-8">{{ professor_user.professor.kontatu|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Email Profisionál</dt>
+                    <dd class="col-sm-8">{{ professor_user.professor.email|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Estatutu</dt>
+                    <dd class="col-sm-8">
+                        {% if professor_user.professor.is_active %}
+                        <span class="badge bg-success">Ativu</span>
+                        {% else %}
+                        <span class="badge bg-danger">Inativu</span>
+                        {% endif %}
+                        <span class="badge bg-secondary">{{ professor_user.professor.get_estadu_display }}</span>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

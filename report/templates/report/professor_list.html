@@ -1,0 +1,166 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Relatóriu Funcionario — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'report-tabela' %}">Relatóriu</a></li>
+<li class="breadcrumb-item active">Lista Funcionario</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0">
+        <i class="bi bi-person-workspace me-2"></i>Relatóriu Lista Funcionario
+    </h5>
+    <a href="{% url 'report-tabela' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Fila Fali
+    </a>
+</div>
+
+<!-- Filters -->
+<form method="get" class="row gx-2 gy-2 align-items-end mb-3">
+    <div class="col-auto">
+        <label class="form-label small text-muted mb-1">Sexu</label>
+        <select name="sexu" class="form-select form-select-sm">
+            <option value="">Hotu-hotu</option>
+            <option value="M" {% if sexu_filter == "M" %}selected{% endif %}>Mane</option>
+            <option value="F" {% if sexu_filter == "F" %}selected{% endif %}>Feto</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <label class="form-label small text-muted mb-1">Estadu</label>
+        <select name="estadu" class="form-select form-select-sm">
+            <option value="">Hotu-hotu</option>
+            {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if estadu_filter == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <label class="form-label small text-muted mb-1">Posisaun</label>
+        <select name="posisaun" class="form-select form-select-sm">
+            <option value="">Hotu-hotu</option>
+            {% for val, label in posisaun_choices %}
+            <option value="{{ val }}" {% if posisaun_filter == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <label class="form-label small text-muted mb-1">Nível Akadémiku</label>
+        <select name="nivel" class="form-select form-select-sm">
+            <option value="">Hotu-hotu</option>
+            {% for val, label in nivel_choices %}
+            <option value="{{ val }}" {% if nivel_filter == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-outline-secondary btn-sm" type="submit">
+            <i class="bi bi-funnel me-1"></i>Filtra
+        </button>
+        {% if has_filters %}
+        <a href="{% url 'report-professor-list' %}" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-x"></i>
+        </a>
+        {% endif %}
+    </div>
+</form>
+
+<!-- Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <table id="reportProfessorTable" class="table table-hover align-middle mb-0 w-100">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Naran</th>
+                    <th>Nº Funcionario</th>
+                    <th>Sexu</th>
+                    <th>Posisaun</th>
+                    <th>Estadu</th>
+                    <th>Nível</th>
+                    <th>Distritu</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prof in professores %}
+                <tr>
+                    <td class="text-muted small">{{ forloop.counter }}</td>
+                    <td>
+                        <a href="{% url 'professor-detail' prof.pk %}" class="fw-semibold text-decoration-none">
+                            {{ prof.nome }}
+                        </a>
+                        {% if prof.email %}
+                        <br><small class="text-muted">{{ prof.email }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="font-monospace small">{{ prof.numero_funcionario|default:"—" }}</span>
+                    </td>
+                    <td>{{ prof.get_sexu_display }}</td>
+                    <td>{{ prof.get_posisaun_prof_display|default:"—" }}</td>
+                    <td>
+                        {% if prof.estadu == 'PERMANENTE' %}
+                        <span class="badge bg-success">{{ prof.get_estadu_display }}</span>
+                        {% elif prof.estadu == 'KONTRATADU' %}
+                        <span class="badge bg-primary">{{ prof.get_estadu_display }}</span>
+                        {% elif prof.estadu == 'VOLUNTARIU' %}
+                        <span class="badge bg-warning text-dark">{{ prof.get_estadu_display }}</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ prof.get_estadu_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ prof.get_nivel_akademiku_display|default:"—" }}</td>
+                    <td>{{ prof.distrito.distrito|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.bootstrap5.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.print.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    new DataTable('#reportProfessorTable', {
+        order: [[1, 'asc']],
+        columnDefs: [{ targets: 0, orderable: false, searchable: false }],
+        language: {
+            search: 'Buka:',
+            lengthMenu: 'Hatudu _MENU_ rejistu',
+            info: 'Hatudu _START_ to _END_ husi _TOTAL_ rejistu',
+            infoEmpty: 'Laiha rejistu',
+            infoFiltered: '(filtradu husi _MAX_ rejistu totál)',
+            paginate: { previous: 'Anterior', next: 'Tuir Mai' },
+            emptyTable: 'Laiha dadus iha tabela ne\'e',
+        },
+        layout: {
+            topStart: {
+                buttons: [
+                    { extend: 'copy',  text: '<i class="bi bi-clipboard"></i> Copy',  className: 'btn btn-sm' },
+                    { extend: 'excel', text: '<i class="bi bi-file-earmark-excel"></i> Excel', className: 'btn btn-sm' },
+                    { extend: 'pdf',   text: '<i class="bi bi-file-earmark-pdf"></i> PDF',   className: 'btn btn-sm' },
+                    { extend: 'print', text: '<i class="bi bi-printer"></i> Print',           className: 'btn btn-sm' },
+                ],
+            },
+        },
+    });
+});
+</script>
+{% endblock %}

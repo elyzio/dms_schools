@@ -1,0 +1,14 @@
+{% extends 'registration/base.html' %}
+
+{% block title %}Sai — SI Schools{% endblock %}
+{% block subtitle %}Ita sai ona husi sistema{% endblock %}
+
+{% block content %}
+<div class="text-center py-2">
+    <i class="bi bi-check-circle-fill text-success" style="font-size: 2.5rem;"></i>
+    <p class="mt-3 mb-4 text-muted">Ita boot sai ho susesu.</p>
+    <a href="{% url 'login' %}" class="btn btn-primary">
+        <i class="bi bi-box-arrow-in-right me-1"></i>Login fali
+    </a>
+</div>
+{% endblock %}

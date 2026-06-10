@@ -1,0 +1,212 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Tabela — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Relatóriu</li>
+<li class="breadcrumb-item active">Tabela</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-table me-2"></i>Relatóriu Tabela</h5>
+    <a href="{% url 'report-grafiku' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-bar-chart-line me-1"></i>Haree Grafiku
+    </a>
+</div>
+
+<div class="row g-3 mb-3">
+
+    <!-- ① Students by District -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-geo-alt me-1 text-danger"></i>Estudante Ativo husi Distritu
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Distritu</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in students_by_district %}
+                        <tr>
+                            <td>{{ row.distrito__distrito }}</td>
+                            <td class="text-end">
+                                <a href="{% url 'report-estudante-list' %}?distrito={{ row.distrito__id }}"
+                                   class="fw-semibold text-primary text-decoration-none">
+                                    {{ row.total }}
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-center text-muted py-3">Laiha dadus</td></tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-secondary fw-semibold">
+                        <tr>
+                            <td>Total</td>
+                            <td class="text-end">
+                                <a href="{% url 'report-estudante-list' %}"
+                                   class="fw-semibold text-dark text-decoration-none">
+                                    {{ district_total }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ② Teachers by Position -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-person-badge me-1 text-success"></i>Funcionario Ativo husi Posisaun
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Posisaun</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in teachers_by_posisaun %}
+                        <tr>
+                            <td>{{ row.posisaun }}</td>
+                            <td class="text-end">
+                                <a href="{% url 'report-professor-list' %}?posisaun={{ row.posisaun_val }}"
+                                   class="fw-semibold text-success text-decoration-none">
+                                    {{ row.total }}
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-center text-muted py-3">Laiha dadus</td></tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-secondary fw-semibold">
+                        <tr>
+                            <td>Total</td>
+                            <td class="text-end">
+                                <a href="{% url 'report-professor-list' %}"
+                                   class="fw-semibold text-dark text-decoration-none">
+                                    {{ teachers_total }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-3">
+
+    <!-- ③ Students by Class and Turma -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-diagram-3 me-1 text-primary"></i>Estudante Ativo husi Klase no Turma
+                <small class="text-muted fw-normal">(Tinan Ativo)</small>
+            </div>
+            <div class="card-body p-0">
+                {% if students_by_classe_turma %}
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Klase / Turma</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cl in students_by_classe_turma %}
+                            {% for tm in cl.turmas %}
+                            <tr>
+                                <td class="ps-3">{{ cl.classe }} — Turma {{ tm.turma }}</td>
+                                <td class="text-end">
+                                    <a href="{% url 'report-estudante-list' %}?classe={{ tm.classe_id }}&turma={{ tm.turma_id }}"
+                                       class="fw-semibold text-primary text-decoration-none">
+                                        {{ tm.total }}
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="table-light">
+                                <td class="fw-semibold text-end pe-3">
+                                    <small>Total {{ cl.classe }}</small>
+                                </td>
+                                <td class="text-end fw-semibold">
+                                    <a href="{% url 'report-estudante-list' %}?classe={{ cl.classe_id }}"
+                                       class="text-dark text-decoration-none">
+                                        {{ cl.class_total }}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-info-circle me-1"></i>Laiha tinan letivo ativo ka laiha matrikula.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ④ Teachers by Employment Status -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-briefcase me-1 text-warning"></i>Funcionario Ativo husi Estadu Kontratual
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Estadu</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in teachers_by_estadu %}
+                        <tr>
+                            <td>{{ row.estadu }}</td>
+                            <td class="text-end">
+                                <a href="{% url 'report-professor-list' %}?estadu={{ row.estadu_val }}"
+                                   class="fw-semibold text-warning text-decoration-none">
+                                    {{ row.total }}
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-center text-muted py-3">Laiha dadus</td></tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-secondary fw-semibold">
+                        <tr>
+                            <td>Total</td>
+                            <td class="text-end">
+                                <a href="{% url 'report-professor-list' %}"
+                                   class="fw-semibold text-dark text-decoration-none">
+                                    {{ teachers_total }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

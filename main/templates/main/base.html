@@ -1,0 +1,307 @@
+{% load static %}
+{% load role_tags %}
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SI Schools{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ① Mobile topbar (< 768px only) -->
+<nav class="mobile-topbar">
+    <a class="mobile-brand" href="{% url 'dashboard' %}">
+        <i class="bi bi-mortarboard-fill"></i>
+        <span>SI Schools</span>
+    </a>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+        <i class="bi bi-list"></i>
+    </button>
+</nav>
+
+<!-- ② Mobile dropdown menu -->
+<div class="mobile-menu" id="mobileMenu">
+    <ul class="nav flex-column py-2">
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+               href="{% url 'dashboard' %}">
+                <i class="bi bi-speedometer2"></i>Dashboard
+            </a>
+        </li>
+
+        {% if not request.user|is_teacher %}
+        <li class="nav-item">
+            <small class="mobile-menu-section">Gestão</small>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'estudante' in request.path %}active{% endif %}"
+               href="{% url 'estudante-list' %}">
+                <i class="bi bi-person-vcard"></i>Estudante
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center justify-content-between {% if 'funcionario' in request.path %}active{% endif %}"
+               href="#funcionarioSubmenuMobile" data-bs-toggle="collapse" role="button"
+               aria-expanded="{% if 'funcionario' in request.path %}true{% else %}false{% endif %}">
+                <span><i class="bi bi-person-workspace"></i>Funcionario</span>
+                <i class="bi bi-chevron-down small submenu-caret"></i>
+            </a>
+            <ul class="collapse nav flex-column submenu {% if 'funcionario' in request.path %}show{% endif %}" id="funcionarioSubmenuMobile">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'professor-list' %}active{% endif %}"
+                       href="{% url 'professor-list' %}">
+                        <i class="bi bi-dot"></i>Professor Lista
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'professor-klasse-list' %}active{% endif %}"
+                       href="{% url 'professor-klasse-list' %}">
+                        <i class="bi bi-dot"></i>Professor Klasse
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'professor-materia-list' %}active{% endif %}"
+                       href="{% url 'professor-materia-list' %}">
+                        <i class="bi bi-dot"></i>Professor Materia
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <small class="mobile-menu-section">Relatóriu</small>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center justify-content-between {% if 'report' in request.path %}active{% endif %}"
+               href="#reportSubmenuMobile" data-bs-toggle="collapse" role="button"
+               aria-expanded="{% if 'report' in request.path %}true{% else %}false{% endif %}">
+                <span><i class="bi bi-bar-chart-line"></i>Relatóriu</span>
+                <i class="bi bi-chevron-down small submenu-caret"></i>
+            </a>
+            <ul class="collapse nav flex-column submenu {% if 'report' in request.path %}show{% endif %}" id="reportSubmenuMobile">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'report-grafiku' %}active{% endif %}"
+                       href="{% url 'report-grafiku' %}">
+                        <i class="bi bi-dot"></i>Grafiku
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'report-tabela' %}active{% endif %}"
+                       href="{% url 'report-tabela' %}">
+                        <i class="bi bi-dot"></i>Tabela
+                    </a>
+                </li>
+            </ul>
+        </li>
+        {% if request.user|is_admin %}
+        <li class="nav-item">
+            <small class="mobile-menu-section">Sistema</small>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'users' in request.path %}active{% endif %}"
+               href="{% url 'user-list' %}">
+                <i class="bi bi-people"></i>Utilizadores
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/admin/" target="_blank">
+                <i class="bi bi-gear"></i>Admin
+            </a>
+        </li>
+        {% endif %}
+        {% endif %}
+
+        {% if request.user|is_teacher %}
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'user-profile' or request.resolver_match.url_name == 'user-profile-update' or request.resolver_match.url_name == 'user-profile-password' %}active{% endif %}"
+               href="{% url 'user-profile' %}">
+                <i class="bi bi-person-circle"></i>Perfil
+            </a>
+        </li>
+        {% endif %}
+
+        <li class="nav-item mt-2 px-3 pb-2 border-top border-secondary pt-2">
+            <small class="text-muted d-block mb-2">{{ request.user.get_full_name|default:request.user.username }}</small>
+            <a href="{% url 'user-profile-password' %}" class="btn btn-sm btn-outline-secondary w-100 mb-2">
+                <i class="bi bi-key me-1"></i>Muda Password
+            </a>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-secondary w-100">
+                    <i class="bi bi-box-arrow-right me-1"></i>Sai
+                </button>
+            </form>
+        </li>
+    </ul>
+</div>
+<div class="mobile-overlay" id="mobileOverlay"></div>
+
+<!-- ③ Desktop sidebar (≥ 768px) -->
+<nav class="sidebar" id="sidebar">
+    <a class="sidebar-brand" href="{% url 'dashboard' %}">
+        <i class="bi bi-mortarboard-fill me-2"></i>SI Schools
+    </a>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+               href="{% url 'dashboard' %}">
+                <i class="bi bi-speedometer2"></i>Dashboard
+            </a>
+        </li>
+
+        {% if not request.user|is_teacher %}
+        <li class="nav-item mt-2">
+            <small class="text-muted px-3 text-uppercase" style="font-size:0.7rem;letter-spacing:.05em;">Gestão</small>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'estudante' in request.path %}active{% endif %}"
+               href="{% url 'estudante-list' %}">
+                <i class="bi bi-person-vcard"></i>Estudante
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center justify-content-between {% if 'funcionario' in request.path %}active{% endif %}"
+               href="#funcionarioSubmenuDesktop" data-bs-toggle="collapse" role="button"
+               aria-expanded="{% if 'funcionario' in request.path %}true{% else %}false{% endif %}">
+                <span><i class="bi bi-person-workspace"></i>Funcionario</span>
+                <i class="bi bi-chevron-down small submenu-caret"></i>
+            </a>
+            <ul class="collapse nav flex-column submenu {% if 'funcionario' in request.path %}show{% endif %}" id="funcionarioSubmenuDesktop">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'professor-list' %}active{% endif %}"
+                       href="{% url 'professor-list' %}">
+                        <i class="bi bi-dot"></i>Professor Lista
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'professor-klasse-list' %}active{% endif %}"
+                       href="{% url 'professor-klasse-list' %}">
+                        <i class="bi bi-dot"></i>Professor Klasse
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'professor-materia-list' %}active{% endif %}"
+                       href="{% url 'professor-materia-list' %}">
+                        <i class="bi bi-dot"></i>Professor Materia
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="nav-item mt-2">
+            <small class="text-muted px-3 text-uppercase" style="font-size:0.7rem;letter-spacing:.05em;">Relatóriu</small>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center justify-content-between {% if 'report' in request.path %}active{% endif %}"
+               href="#reportSubmenuDesktop" data-bs-toggle="collapse" role="button"
+               aria-expanded="{% if 'report' in request.path %}true{% else %}false{% endif %}">
+                <span><i class="bi bi-bar-chart-line"></i>Relatóriu</span>
+                <i class="bi bi-chevron-down small submenu-caret"></i>
+            </a>
+            <ul class="collapse nav flex-column submenu {% if 'report' in request.path %}show{% endif %}" id="reportSubmenuDesktop">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'report-grafiku' %}active{% endif %}"
+                       href="{% url 'report-grafiku' %}">
+                        <i class="bi bi-dot"></i>Grafiku
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'report-tabela' %}active{% endif %}"
+                       href="{% url 'report-tabela' %}">
+                        <i class="bi bi-dot"></i>Tabela
+                    </a>
+                </li>
+            </ul>
+        </li>
+        {% if request.user|is_admin %}
+        <li class="nav-item mt-2">
+            <small class="text-muted px-3 text-uppercase" style="font-size:0.7rem;letter-spacing:.05em;">Sistema</small>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'users' in request.path %}active{% endif %}"
+               href="{% url 'user-list' %}">
+                <i class="bi bi-people"></i>Utilizadores
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/admin/" target="_blank">
+                <i class="bi bi-gear"></i>Admin
+            </a>
+        </li>
+        {% endif %}
+        {% endif %}
+
+        {% if request.user|is_teacher %}
+        <li class="nav-item mt-2">
+            <small class="text-muted px-3 text-uppercase" style="font-size:0.7rem;letter-spacing:.05em;">Konta</small>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'user-profile' or request.resolver_match.url_name == 'user-profile-update' or request.resolver_match.url_name == 'user-profile-password' %}active{% endif %}"
+               href="{% url 'user-profile' %}">
+                <i class="bi bi-person-circle"></i>Perfil
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+    <div class="mt-auto p-3 border-top border-secondary">
+        <small class="text-muted d-block mb-1">{{ request.user.get_full_name|default:request.user.username }}</small>
+        <a href="{% url 'user-profile-password' %}" class="btn btn-sm btn-outline-secondary w-100 mb-2">
+            <i class="bi bi-key me-1"></i>Muda Password
+        </a>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-secondary w-100">
+                <i class="bi bi-box-arrow-right me-1"></i>Sai
+            </button>
+        </form>
+    </div>
+</nav>
+
+<!-- ④ Desktop topbar -->
+<div class="topbar" id="topbar">
+    <div class="d-flex align-items-center gap-3">
+        <button class="sidebar-toggle-btn" id="sidebarToggle" aria-label="Toggle sidebar" title="Haree/Taka Sidebar">
+            <i class="bi bi-layout-sidebar"></i>
+        </button>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                {% block breadcrumb %}
+                <li class="breadcrumb-item active">Dashboard</li>
+                {% endblock %}
+            </ol>
+        </nav>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-primary">{{ request.user.username }}</span>
+    </div>
+</div>
+
+<!-- Flash messages -->
+{% if messages %}
+<div class="main-content pt-0 pb-0">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show mt-3 mb-0" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ⑤ Main content -->
+<main class="main-content">
+    {% block content %}{% endblock %}
+    <footer class="app-footer">
+        <span>&copy; {% now "Y" %} SI Schools</span>
+        <span>v1.0</span>
+    </footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'assets/js/custom.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

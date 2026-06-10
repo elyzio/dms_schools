@@ -1,0 +1,126 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Atribuisaun Materia — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'professor-list' %}">Funcionario</a></li>
+<li class="breadcrumb-item active">Atribuisaun Materia</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-journal-text me-2"></i>Atribuisaun Materia</h5>
+    <a href="{% url 'professor-materia-create' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Atribuisaun Foun
+    </a>
+</div>
+
+<form method="get" class="mb-3">
+    <div class="input-group" style="max-width: 400px;">
+        <input type="text" name="q" value="{{ q }}" class="form-control"
+               placeholder="Buka husi professor, materia ka klase...">
+        <button class="btn btn-outline-secondary" type="submit">
+            <i class="bi bi-search"></i>
+        </button>
+        {% if q %}
+        <a href="{% url 'professor-materia-list' %}" class="btn btn-outline-danger">
+            <i class="bi bi-x"></i>
+        </a>
+        {% endif %}
+    </div>
+</form>
+
+<div class="card table-card">
+    <div class="card-body">
+        <table id="professorMateriaTable" class="table table-hover align-middle mb-0 w-100">
+            <thead class="table-light">
+                <tr>
+                    <th>Professor</th>
+                    <th>Materia</th>
+                    <th>Klase</th>
+                    <th>Ativu</th>
+                    <th class="text-end">Aksaun</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for at in atribuisoes %}
+                <tr>
+                    <td>
+                        <a href="{% url 'professor-detail' at.professor.pk %}" class="fw-semibold text-decoration-none">
+                            {{ at.professor.nome }}
+                        </a>
+                    </td>
+                    <td>{{ at.materia }}</td>
+                    <td>{{ at.classe }}</td>
+                    <td>
+                        {% if at.is_active %}
+                        <span class="badge bg-success">Sim</span>
+                        {% else %}
+                        <span class="badge bg-danger">Lae</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'professor-materia-update' at.pk %}"
+                           class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="post" action="{% url 'professor-materia-delete' at.pk %}" class="d-inline"
+                              onsubmit="return confirm('Ita boot iha serteza atu hamoos atribuisaun ne\'e?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.bootstrap5.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.print.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        new DataTable('#professorMateriaTable', {
+            order: [],
+            columnDefs: [{ targets: -1, orderable: false, searchable: false }],
+            language: {
+                search: 'Buka:',
+                lengthMenu: 'Hatudu _MENU_ rejistu',
+                info: 'Hatudu _START_ to _END_ husi _TOTAL_ rejistu',
+                infoEmpty: 'Laiha rejistu',
+                infoFiltered: '(filtradu husi _MAX_ rejistu totál)',
+                paginate: { previous: 'Anterior', next: 'Tuir Mai' },
+                emptyTable: 'Laiha dadus iha tabela ne\'e',
+            },
+            layout: {
+                topStart: {
+                    buttons: [
+                        { extend: 'copy', text: '<i class="bi bi-clipboard"></i> Copy', className: 'btn btn-sm' },
+                        { extend: 'excel', text: '<i class="bi bi-file-earmark-excel"></i> Excel', className: 'btn btn-sm' },
+                        { extend: 'pdf', text: '<i class="bi bi-file-earmark-pdf"></i> PDF', className: 'btn btn-sm' },
+                        { extend: 'print', text: '<i class="bi bi-printer"></i> Print', className: 'btn btn-sm' },
+                    ],
+                },
+            },
+        });
+    });
+</script>
+{% endblock %}

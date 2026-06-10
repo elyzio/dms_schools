@@ -1,0 +1,215 @@
+{% extends 'main/base.html' %}
+
+{% block title %}{{ professor.nome }} — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'professor-list' %}">Funcionario</a></li>
+<li class="breadcrumb-item active">{{ professor.nome }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0">
+        <i class="bi bi-person-workspace me-2"></i>{{ professor.nome }}
+    </h5>
+    <div class="d-flex gap-2">
+        <a href="{% url 'professor-update' professor.pk %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-pencil me-1"></i>Edita
+        </a>
+        <a href="{% url 'professor-user-password' professor.pk %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-key me-1"></i>Troka Password
+        </a>
+        {% if not professor_user %}
+        <a href="{% url 'professor-user' professor.pk %}" class="btn btn-sm btn-primary">
+            <i class="bi bi-person-plus me-1"></i>Kria User
+        </a>
+        {% endif %}
+        <form method="post" action="{% url 'professor-delete' professor.pk %}"
+              onsubmit="return confirm('Ita boot iha serteza atu hamoos funcionario {{ professor.nome }}?')">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash me-1"></i>Hamoos
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Profile Card -->
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center py-4">
+                {% if professor.imagem %}
+                <img src="{{ professor.imagem.url }}" class="rounded-circle mb-3"
+                     width="100" height="100" style="object-fit:cover;">
+                {% else %}
+                <div class="rounded-circle bg-success bg-opacity-10 text-success d-inline-flex
+                            align-items-center justify-content-center mb-3"
+                     style="width:100px;height:100px;font-size:2.5rem;">
+                    {{ professor.nome|first|upper }}
+                </div>
+                {% endif %}
+                <h6 class="fw-bold mb-1">{{ professor.nome }}</h6>
+                <span class="text-muted small">{{ professor.get_posisaun_prof_display|default:"—" }}</span>
+                <div class="mt-2">
+                    {% if professor.is_active %}
+                    <span class="badge bg-success">Ativo</span>
+                    {% else %}
+                    <span class="badge bg-danger">Inativo</span>
+                    {% endif %}
+                    <span class="badge bg-secondary">{{ professor.get_estadu_display }}</span>
+                </div>
+                {% if professor_user %}
+                <div class="mt-3 p-2 bg-light rounded">
+                    <small class="text-muted d-block">Utilizador do Sistema</small>
+                    <span class="fw-semibold">{{ professor_user.user.username }}</span>
+                    <div>
+                        {% for group in professor_user.user.groups.all %}
+                        <span class="badge bg-primary">{{ group.name }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Info -->
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-white fw-semibold">Informasaun Pessoal</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">N.º Emis Professor</dt>
+                    <dd class="col-sm-8">{{ professor.emis_prof|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">N.º Funcionario</dt>
+                    <dd class="col-sm-8">{{ professor.numero_funcionario|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">N.º Eleitoral</dt>
+                    <dd class="col-sm-8">{{ professor.eleitoral_prof|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Sexu</dt>
+                    <dd class="col-sm-8">{{ professor.get_sexu_display }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Data Moris</dt>
+                    <dd class="col-sm-8">{{ professor.data_moris }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Fatin Moris</dt>
+                    <dd class="col-sm-8">{{ professor.fatin_moris|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Nivel Akademiku</dt>
+                    <dd class="col-sm-8">{{ professor.get_nivel_akademiku_display }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Grau Akademiku</dt>
+                    <dd class="col-sm-8">{{ professor.grau_akademiku|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Data Kontratadu</dt>
+                    <dd class="col-sm-8">{{ professor.data_contratacao|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Kontatu</dt>
+                    <dd class="col-sm-8">{{ professor.kontatu|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Email</dt>
+                    <dd class="col-sm-8">{{ professor.email|default:"—" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">Enderesu</dt>
+                    <dd class="col-sm-8">
+                        {{ professor.aldeia.aldeia }}, {{ professor.suco.suco }},
+                        {{ professor.subdistrito.subdistrito }}, {{ professor.distrito.distrito }}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Class Assignments -->
+    <div class="col-12">
+        <div class="card table-card">
+            <div class="card-header bg-white d-flex align-items-center justify-content-between">
+                <span class="fw-semibold"><i class="bi bi-journal-bookmark me-2"></i>Atribuisaun Klase</span>
+                <a href="{% url 'professor-klasse-list' %}" class="btn btn-sm btn-link text-decoration-none">
+                    Jere Atribuisaun Klase <i class="bi bi-arrow-right-short"></i>
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Ano</th>
+                            <th>Departamentu</th>
+                            <th>Klase</th>
+                            <th>Turma</th>
+                            <th>Profesor Prinsipal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pc in classes %}
+                        <tr>
+                            <td>{{ pc.ano.ano }}</td>
+                            <td>{{ pc.departamento }}</td>
+                            <td>{{ pc.classe }}</td>
+                            <td>{{ pc.turma }}</td>
+                            <td>
+                                {% if pc.is_class_teacher %}
+                                <span class="badge bg-success">Sim</span>
+                                {% else %}
+                                <span class="badge bg-light text-dark">Lae</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-3">Seidauk iha atribuisaun klase.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Materia Assignments -->
+    <div class="col-12">
+        <div class="card table-card">
+            <div class="card-header bg-white d-flex align-items-center justify-content-between">
+                <span class="fw-semibold"><i class="bi bi-journal-text me-2"></i>Atribuisaun Materia</span>
+                <a href="{% url 'professor-materia-list' %}" class="btn btn-sm btn-link text-decoration-none">
+                    Jere Atribuisaun Materia <i class="bi bi-arrow-right-short"></i>
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Materia</th>
+                            <th>Klase</th>
+                            <th>Ativu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pm in materias %}
+                        <tr>
+                            <td>{{ pm.materia }}</td>
+                            <td>{{ pm.classe }}</td>
+                            <td>
+                                {% if pm.is_active %}
+                                <span class="badge bg-success">Sim</span>
+                                {% else %}
+                                <span class="badge bg-danger">Lae</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-3">Seidauk iha atribuisaun materia.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

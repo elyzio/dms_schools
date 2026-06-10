@@ -1,0 +1,39 @@
+{% extends 'main/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Papel ba {{ target_user.username }} — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'user-list' %}">Utilizadores</a></li>
+<li class="breadcrumb-item active">Papel — {{ target_user.username }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm" style="max-width: 500px;">
+    <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-shield-check me-2"></i>Atribui Papel ba {{ target_user.username }}
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-3">
+                <label class="form-label fw-semibold">{{ field.label }}</label>
+                {% for checkbox in field %}
+                <div class="form-check">
+                    {{ checkbox.tag }}
+                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                        {{ checkbox.choice_label }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Salva</button>
+                <a href="{% url 'user-list' %}" class="btn btn-outline-secondary">Kansela</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

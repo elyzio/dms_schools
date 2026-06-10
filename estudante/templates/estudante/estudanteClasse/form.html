@@ -1,0 +1,26 @@
+{% extends 'main/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Matrikula {{ estudante.nome }} — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'estudante-list' %}">Estudante</a></li>
+<li class="breadcrumb-item">
+    <a href="{% url 'estudante-detail' estudante.pk %}">{{ estudante.nome }}</a>
+</li>
+<li class="breadcrumb-item active">Matrikula Foun</li>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm" style="max-width: 700px;">
+    <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-journal-bookmark me-2"></i>Matrikula — {{ estudante.nome }}
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {% crispy form %}
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,182 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Relatóriu Estudante — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'report-tabela' %}">Relatóriu</a></li>
+<li class="breadcrumb-item active">Lista Estudante</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0">
+        <i class="bi bi-person-lines-fill me-2"></i>Relatóriu Lista Estudante
+    </h5>
+    <a href="{% url 'report-tabela' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Fila Fali
+    </a>
+</div>
+
+<!-- Filters -->
+<form method="get" class="row gx-2 gy-2 align-items-end mb-3">
+    <div class="col-auto">
+        <label class="form-label small text-muted mb-1">Distritu</label>
+        <select name="distrito" class="form-select form-select-sm">
+            <option value="">Hotu-hotu</option>
+            {% for dt in distrito_list %}
+            <option value="{{ dt.id }}" {% if distrito_filter == dt.id|stringformat:"s" %}selected{% endif %}>
+                {{ dt.distrito }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <label class="form-label small text-muted mb-1">Sexu</label>
+        <select name="sexu" class="form-select form-select-sm">
+            <option value="">Hotu-hotu</option>
+            <option value="M" {% if sexu_filter == "M" %}selected{% endif %}>Mane</option>
+            <option value="F" {% if sexu_filter == "F" %}selected{% endif %}>Feto</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <label class="form-label small text-muted mb-1">Klase</label>
+        <select name="classe" class="form-select form-select-sm">
+            <option value="">Hotu-hotu</option>
+            {% for cl in classe_list %}
+            <option value="{{ cl.id }}" {% if classe_filter == cl.id|stringformat:"s" %}selected{% endif %}>
+                {{ cl.classe }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <label class="form-label small text-muted mb-1">Turma</label>
+        <select name="turma" class="form-select form-select-sm">
+            <option value="">Hotu-hotu</option>
+            {% for tm in turma_list %}
+            <option value="{{ tm.id }}" {% if turma_filter == tm.id|stringformat:"s" %}selected{% endif %}>
+                {{ tm.turma }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-outline-secondary btn-sm" type="submit">
+            <i class="bi bi-funnel me-1"></i>Filtra
+        </button>
+        {% if has_filters %}
+        <a href="{% url 'report-estudante-list' %}" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-x"></i>
+        </a>
+        {% endif %}
+    </div>
+</form>
+
+<!-- Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <table id="reportEstudanteTable" class="table table-hover align-middle mb-0 w-100">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Naran</th>
+                    <th>EMIS</th>
+                    <th>Sexu</th>
+                    <th>Distritu</th>
+                    <th>Klase</th>
+                    <th>Turma</th>
+                    <th>Estadu</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for est in estudantes %}
+                {% with enrollment=est.current_enrollment %}
+                <tr>
+                    <td class="text-muted small">{{ forloop.counter }}</td>
+                    <td>
+                        <a href="{% url 'estudante-detail' est.pk %}" class="fw-semibold text-decoration-none">
+                            {{ est.nome }}
+                        </a>
+                        <br><small class="text-muted">{{ est.numero_estudante }}</small>
+                    </td>
+                    <td><span class="font-monospace small">{{ est.emis }}</span></td>
+                    <td>{{ est.get_sexu_display }}</td>
+                    <td>{{ est.distrito.distrito|default:"—" }}</td>
+                    <td>
+                        {% if enrollment %}
+                            {{ enrollment.0.classe.classe }}
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if enrollment %}
+                            {{ enrollment.0.turma.turma }}
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if est.is_active %}
+                        <span class="badge bg-success">Ativo</span>
+                        {% elif est.is_transfer %}
+                        <span class="badge bg-warning text-dark">Transfer</span>
+                        {% elif est.is_alumni %}
+                        <span class="badge bg-secondary">Alumni</span>
+                        {% else %}
+                        <span class="badge bg-danger">Inativo</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endwith %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.bootstrap5.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.print.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    new DataTable('#reportEstudanteTable', {
+        order: [[1, 'asc']],
+        columnDefs: [{ targets: 0, orderable: false, searchable: false }],
+        language: {
+            search: 'Buka:',
+            lengthMenu: 'Hatudu _MENU_ rejistu',
+            info: 'Hatudu _START_ to _END_ husi _TOTAL_ rejistu',
+            infoEmpty: 'Laiha rejistu',
+            infoFiltered: '(filtradu husi _MAX_ rejistu totál)',
+            paginate: { previous: 'Anterior', next: 'Tuir Mai' },
+            emptyTable: 'Laiha dadus iha tabela ne\'e',
+        },
+        layout: {
+            topStart: {
+                buttons: [
+                    { extend: 'copy',  text: '<i class="bi bi-clipboard"></i> Copy',  className: 'btn btn-sm' },
+                    { extend: 'excel', text: '<i class="bi bi-file-earmark-excel"></i> Excel', className: 'btn btn-sm' },
+                    { extend: 'pdf',   text: '<i class="bi bi-file-earmark-pdf"></i> PDF',   className: 'btn btn-sm' },
+                    { extend: 'print', text: '<i class="bi bi-printer"></i> Print',           className: 'btn btn-sm' },
+                ],
+            },
+        },
+    });
+});
+</script>
+{% endblock %}

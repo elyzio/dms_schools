@@ -1,0 +1,51 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if object %}Edita {{ object.nome }}{% else %}Funcionario Foun{% endif %} — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'professor-list' %}">Funcionario</a></li>
+{% if object %}
+<li class="breadcrumb-item">
+    <a href="{% url 'professor-detail' object.pk %}">{{ object.nome }}</a>
+</li>
+<li class="breadcrumb-item active">Edita</li>
+{% else %}
+<li class="breadcrumb-item active">Foun</li>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-person-workspace me-2"></i>
+        {% if object %}Edita Funcionario: {{ object.nome }}{% else %}Rejistrasaun Funcionario Foun{% endif %}
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% crispy form %}
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'assets/js/address-cascade.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        setupAddressCascade({
+            distrito: 'id_distrito',
+            subdistrito: 'id_subdistrito',
+            suco: 'id_suco',
+            aldeia: 'id_aldeia',
+            urls: {
+                subdistritos: '{% url "ajax-load-subdistritos" %}',
+                sucos: '{% url "ajax-load-sucos" %}',
+                aldeias: '{% url "ajax-load-aldeias" %}'
+            }
+        });
+    });
+</script>
+{% endblock %}
