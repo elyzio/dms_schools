@@ -1,0 +1,24 @@
+{% extends 'main/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if object %}Edita Horariu{% else %}Entrada Horariu Foun{% endif %} — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'horariu-list' %}">Horariu</a></li>
+<li class="breadcrumb-item active">{% if object %}Edita{% else %}Foun{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm" style="max-width: 700px;">
+    <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-calendar-week me-2"></i>
+        {% if object %}Edita Entrada Horariu{% else %}Entrada Horariu Foun{% endif %}
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {% crispy form %}
+        </form>
+    </div>
+</div>
+{% endblock %}

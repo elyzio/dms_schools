@@ -1,0 +1,98 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Oras — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'horariu-list' %}">Horariu</a></li>
+<li class="breadcrumb-item active">Oras</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-clock me-2"></i>Oras</h5>
+    <a href="{% url 'horas-create' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Oras Foun
+    </a>
+</div>
+
+<div class="card table-card">
+    <div class="card-body">
+        <table id="horasTable" class="table table-hover align-middle mb-0 w-100">
+            <thead class="table-light">
+                <tr>
+                    <th>Oras Hahu</th>
+                    <th>Oras Termina</th>
+                    <th>Observasaun</th>
+                    <th class="text-end">Aksaun</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in horas_list %}
+                <tr>
+                    <td class="fw-semibold">{{ h.horas_hahu }}</td>
+                    <td>{{ h.horas_termina }}</td>
+                    <td class="text-muted small">{{ h.obs|default:"—" }}</td>
+                    <td class="text-end">
+                        <a href="{% url 'horas-update' h.pk %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="post" action="{% url 'horas-delete' h.pk %}" class="d-inline"
+                              onsubmit="return confirm('Ita boot iha serteza atu hamoos oras ne\'e?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.bootstrap5.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.print.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        new DataTable('#horasTable', {
+            order: [[0, 'asc']],
+            columnDefs: [{ targets: -1, orderable: false, searchable: false }],
+            language: {
+                search: 'Buka:',
+                lengthMenu: 'Hatudu _MENU_ rejistu',
+                info: 'Hatudu _START_ to _END_ husi _TOTAL_ rejistu',
+                infoEmpty: 'Laiha rejistu',
+                infoFiltered: '(filtradu husi _MAX_ rejistu totál)',
+                paginate: { previous: 'Anterior', next: 'Tuir Mai' },
+                emptyTable: 'Laiha dadus iha tabela ne\'e',
+            },
+            layout: {
+                topStart: {
+                    buttons: [
+                        { extend: 'copy', text: '<i class="bi bi-clipboard"></i> Copy', className: 'btn btn-sm' },
+                        { extend: 'excel', text: '<i class="bi bi-file-earmark-excel"></i> Excel', className: 'btn btn-sm' },
+                        { extend: 'pdf', text: '<i class="bi bi-file-earmark-pdf"></i> PDF', className: 'btn btn-sm' },
+                        { extend: 'print', text: '<i class="bi bi-printer"></i> Print', className: 'btn btn-sm' },
+                    ],
+                },
+            },
+        });
+    });
+</script>
+{% endblock %}

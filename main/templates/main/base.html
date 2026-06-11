@@ -72,6 +72,30 @@
                 </li>
             </ul>
         </li>
+        {% if request.user|is_admin or request.user|is_director %}
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center justify-content-between {% if 'horariu' in request.path %}active{% endif %}"
+               href="#horariuSubmenuMobile" data-bs-toggle="collapse" role="button"
+               aria-expanded="{% if 'horariu' in request.path %}true{% else %}false{% endif %}">
+                <span><i class="bi bi-calendar-week"></i>Horariu</span>
+                <i class="bi bi-chevron-down small submenu-caret"></i>
+            </a>
+            <ul class="collapse nav flex-column submenu {% if 'horariu' in request.path %}show{% endif %}" id="horariuSubmenuMobile">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'horariu-list' %}active{% endif %}"
+                       href="{% url 'horariu-list' %}">
+                        <i class="bi bi-dot"></i>Horariu
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'horas-list' %}active{% endif %}"
+                       href="{% url 'horas-list' %}">
+                        <i class="bi bi-dot"></i>Oras
+                    </a>
+                </li>
+            </ul>
+        </li>
+        {% endif %}
         <li class="nav-item">
             <small class="mobile-menu-section">Relatóriu</small>
         </li>
@@ -116,6 +140,14 @@
         {% endif %}
 
         {% if request.user|is_teacher %}
+        {% if teacher_horariu_professor_pk %}
+        <li class="nav-item">
+            <a class="nav-link {% if 'horariu' in request.path %}active{% endif %}"
+               href="{% url 'horariu-by-professor' teacher_horariu_professor_pk %}">
+                <i class="bi bi-calendar-week"></i>Horariu
+            </a>
+        </li>
+        {% endif %}
         <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'user-profile' or request.resolver_match.url_name == 'user-profile-update' or request.resolver_match.url_name == 'user-profile-password' %}active{% endif %}"
                href="{% url 'user-profile' %}">
@@ -191,6 +223,30 @@
                 </li>
             </ul>
         </li>
+        {% if request.user|is_admin or request.user|is_director %}
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center justify-content-between {% if 'horariu' in request.path %}active{% endif %}"
+               href="#horariuSubmenuDesktop" data-bs-toggle="collapse" role="button"
+               aria-expanded="{% if 'horariu' in request.path %}true{% else %}false{% endif %}">
+                <span><i class="bi bi-calendar-week"></i>Horariu</span>
+                <i class="bi bi-chevron-down small submenu-caret"></i>
+            </a>
+            <ul class="collapse nav flex-column submenu {% if 'horariu' in request.path %}show{% endif %}" id="horariuSubmenuDesktop">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'horariu-list' %}active{% endif %}"
+                       href="{% url 'horariu-list' %}">
+                        <i class="bi bi-dot"></i>Horariu
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'horas-list' %}active{% endif %}"
+                       href="{% url 'horas-list' %}">
+                        <i class="bi bi-dot"></i>Oras
+                    </a>
+                </li>
+            </ul>
+        </li>
+        {% endif %}
         <li class="nav-item mt-2">
             <small class="text-muted px-3 text-uppercase" style="font-size:0.7rem;letter-spacing:.05em;">Relatóriu</small>
         </li>
@@ -238,6 +294,14 @@
         <li class="nav-item mt-2">
             <small class="text-muted px-3 text-uppercase" style="font-size:0.7rem;letter-spacing:.05em;">Konta</small>
         </li>
+        {% if teacher_horariu_professor_pk %}
+        <li class="nav-item">
+            <a class="nav-link {% if 'horariu' in request.path %}active{% endif %}"
+               href="{% url 'horariu-by-professor' teacher_horariu_professor_pk %}">
+                <i class="bi bi-calendar-week"></i>Horariu
+            </a>
+        </li>
+        {% endif %}
         <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'user-profile' or request.resolver_match.url_name == 'user-profile-update' or request.resolver_match.url_name == 'user-profile-password' %}active{% endif %}"
                href="{% url 'user-profile' %}">
