@@ -67,11 +67,20 @@ body {
     font-size: 1.1rem;
     font-weight: 600;
     padding: 0.5rem 1.25rem 1rem;
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     margin-bottom: 0.75rem;
     white-space: nowrap;
     text-decoration: none;
+}
+
+.brand-logo {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
 }
 
 /* ─── Desktop Topbar ──────────────────────────────────────────── */
@@ -162,7 +171,7 @@ body.sidebar-hidden .main-content {
     padding: 1rem 0;
     border-top: 1px solid #dee2e6;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     font-size: 0.8rem;
     color: #6c757d;
 }
@@ -196,6 +205,10 @@ body.sidebar-hidden .main-content {
 .mobile-brand i {
     font-size: 1.3rem;
     color: #0d6efd;
+}
+
+.mobile-brand .brand-logo {
+    height: 32px;
 }
 
 .mobile-menu-btn {
