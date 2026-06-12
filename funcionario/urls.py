@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     ProfessorListView, ProfessorDetailView, ProfessorMyProfileView,
-    ProfessorCreateView, ProfessorUpdateView,
+    ProfessorCreateView, ProfessorUpdateView, ProfessorSelfUpdateView,
     professor_delete_view, ProfessorUserCreateView,
     ProfessorUserPasswordChangeView,
     ProfessorMateriaListView, ProfessorMateriaCreateView,
@@ -13,6 +13,7 @@ from .views import (
 urlpatterns = [
     path('', ProfessorListView.as_view(), name='professor-list'),
     path('meu-perfil/', ProfessorMyProfileView.as_view(), name='professor-my-profile'),
+    path('meu-perfil/editar/', ProfessorSelfUpdateView.as_view(), name='professor-self-update'),
     path('criar/', ProfessorCreateView.as_view(), name='professor-create'),
 
     path('materia/', ProfessorMateriaListView.as_view(), name='professor-materia-list'),

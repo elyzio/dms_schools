@@ -16,9 +16,11 @@
         <a href="{% url 'estudante-update' estudante.pk %}" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-pencil me-1"></i>Edita
         </a>
+        {% if not current_matricula %}
         <a href="{% url 'estudante-matricula' estudante.pk %}" class="btn btn-sm btn-primary">
             <i class="bi bi-plus-lg me-1"></i>Matrikula
         </a>
+        {% endif %}
         <a href="{% url 'estudante-transfer' estudante.pk %}" class="btn btn-sm btn-outline-warning">
             <i class="bi bi-arrow-left-right me-1"></i>Transferénsia
         </a>
@@ -101,14 +103,51 @@
         </div>
     </div>
 
-    <!-- Class Enrollments -->
+    <!-- Current Matrikula -->
     <div class="col-12">
-        <div class="card table-card">
-            <div class="card-header bg-white fw-semibold d-flex align-items-center justify-content-between">
-                <span><i class="bi bi-journal-bookmark me-2"></i>Historial Matrikula</span>
+        <div class="card shadow-sm {% if current_matricula %}border-primary{% endif %}">
+            <div class="card-header fw-semibold d-flex align-items-center justify-content-between
+                        {% if current_matricula %}bg-primary text-white{% else %}bg-white{% endif %}">
+                <span><i class="bi bi-bookmark-star-fill me-2"></i>Matrikula Atual</span>
+                {% if not current_matricula %}
                 <a href="{% url 'estudante-matricula' estudante.pk %}" class="btn btn-sm btn-primary">
                     <i class="bi bi-plus-lg me-1"></i>Matrikula Foun
                 </a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if current_matricula %}
+                <dl class="row mb-0">
+                    <dt class="col-sm-3 text-muted">Ano Akademiku</dt>
+                    <dd class="col-sm-9 fw-semibold">{{ current_matricula.ano.ano }}</dd>
+
+                    <dt class="col-sm-3 text-muted">Departamentu</dt>
+                    <dd class="col-sm-9">{{ current_matricula.departamentu }}</dd>
+
+                    <dt class="col-sm-3 text-muted">Klase</dt>
+                    <dd class="col-sm-9">{{ current_matricula.classe }}</dd>
+
+                    <dt class="col-sm-3 text-muted">Turma</dt>
+                    <dd class="col-sm-9">{{ current_matricula.turma }}</dd>
+
+                    <dt class="col-sm-3 text-muted">Data Matrikula</dt>
+                    <dd class="col-sm-9">{{ current_matricula.data_enrollment }}</dd>
+                </dl>
+                {% else %}
+                <div class="text-center text-muted py-3">
+                    <i class="bi bi-exclamation-circle me-1"></i>
+                    Estudante ida-ne'e seidauk matrikula ba ano akademiku atuál.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Matrikula History -->
+    <div class="col-12">
+        <div class="card table-card">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-journal-bookmark me-2"></i>Historial Matrikula
             </div>
             <div class="card-body p-0">
                 <table class="table table-hover align-middle mb-0">
@@ -118,7 +157,6 @@
                             <th>Departamentu</th>
                             <th>Klase</th>
                             <th>Turma</th>
-                            <!-- <th>Media</th> -->
                             <th>Rezultadu</th>
                         </tr>
                     </thead>
@@ -129,7 +167,6 @@
                             <td>{{ ec.departamentu }}</td>
                             <td>{{ ec.classe }}</td>
                             <td>{{ ec.turma }}</td>
-                            <!-- <td>{{ ec.average_score|default:"—" }}</td> -->
                             <td>
                                 {% if ec.is_passa is None %}
                                 <span class="badge bg-secondary">—</span>
@@ -142,7 +179,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-3">Seidauk iha matrikula.</td>
+                            <td colspan="5" class="text-center text-muted py-3">Seidauk iha historial matrikula.</td>
                         </tr>
                         {% endfor %}
                     </tbody>

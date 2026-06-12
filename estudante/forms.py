@@ -1,6 +1,7 @@
 from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Field, Submit, HTML, Fieldset
+from custom.models import Ano
 from .models import Estudante, EstudanteClasse, EstudanteTransfer
 
 
@@ -89,6 +90,12 @@ class EstudanteClasseForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        try:
+            active_year = Ano.objects.get(is_active=True)
+            self.fields['ano'].initial = active_year
+            self.fields['ano'].disabled = True
+        except Ano.DoesNotExist:
+            pass
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Row(

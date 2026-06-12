@@ -10,8 +10,8 @@ from django.db.models import Q
 from main.mixins import AdminRequiredMixin, NotTeacherMixin, admin_required
 from .models import Professor, ProfessorUser, ProfessorClasse, ProfessorMateria
 from .forms import (
-    ProfessorForm, ProfessorUserForm, ProfessorUserPasswordChangeForm,
-    ProfessorMateriaForm, ProfessorClasseForm,
+    ProfessorForm, ProfessorSelfUpdateForm, ProfessorUserForm,
+    ProfessorUserPasswordChangeForm, ProfessorMateriaForm, ProfessorClasseForm,
 )
 
 
@@ -136,6 +136,30 @@ def professor_delete_view(request, pk):
         messages.warning(request, f'Funcionario {professor.nome} hamoos ona husi sistema.')
         return redirect('professor-list')
     return redirect('professor-detail', pk=pk)
+
+
+class ProfessorSelfUpdateView(LoginRequiredMixin, UpdateView):
+    """Professors update their own non-principal data. No PK in URL."""
+    model = Professor
+    form_class = ProfessorSelfUpdateForm
+    template_name = 'funcionario/professor/self_update_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.groups.filter(name='professor').exists():
+            messages.error(request, 'Asesu la permiti.')
+            return redirect('dashboard')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        try:
+            return self.request.user.professoruser.professor
+        except Exception:
+            messages.error(self.request, 'Perfil professor la hetan.')
+            return redirect('dashboard')
+
+    def get_success_url(self):
+        messages.success(self.request, 'Perfil atualiza ho susesu.')
+        return reverse('professor-detail', kwargs={'pk': self.object.pk})
 
 
 class ProfessorUserCreateView(AdminRequiredMixin, FormView):

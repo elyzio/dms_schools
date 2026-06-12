@@ -158,6 +158,102 @@ class ProfessorUserPasswordChangeForm(forms.Form):
         return cleaned
 
 
+class ProfessorSelfUpdateForm(forms.ModelForm):
+    """Form for professors to update their own non-principal data."""
+
+    _DISABLED = ['nome', 'emis_prof', 'numero_funcionario', 'posisaun_prof', 'estadu', 'data_contratacao']
+
+    class Meta:
+        model = Professor
+        fields = [
+            # disabled — shown but locked
+            'nome', 'emis_prof', 'numero_funcionario', 'posisaun_prof', 'estadu', 'data_contratacao',
+            # editable
+            'sexu', 'estadu_civil', 'data_moris', 'fatin_moris', 'nacionalidade',
+            'eleitoral_prof',
+            'distrito', 'subdistrito', 'suco', 'aldeia',
+            'kontatu', 'email', 'hela_fatin',
+            'nivel_akademiku', 'grau_akademiku',
+            'imagem',
+        ]
+        widgets = {
+            'data_moris': forms.DateInput(attrs={'type': 'date'}),
+            'data_contratacao': forms.DateInput(attrs={'type': 'date'}),
+        }
+        labels = {
+            'nome': 'Naran',
+            'emis_prof': 'No. EMIS',
+            'numero_funcionario': 'No. Funcionario',
+            'posisaun_prof': 'Pozisaun',
+            'estadu': 'Estatutu',
+            'data_contratacao': 'Data Kontratu',
+            'eleitoral_prof': 'No. Eleitoral',
+            'nivel_akademiku': 'Nivel Akademiku',
+            'grau_akademiku': 'Grau Akademiku',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self._DISABLED:
+            if field_name in self.fields:
+                self.fields[field_name].disabled = True
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Fieldset(
+                'Informasaun Prinsipal',
+                Row(
+                    Column('nome', css_class='col-md-6'),
+                    Column('emis_prof', css_class='col-md-3'),
+                    Column('numero_funcionario', css_class='col-md-3'),
+                ),
+                Row(
+                    Column('posisaun_prof', css_class='col-md-4'),
+                    Column('estadu', css_class='col-md-4'),
+                    Column('data_contratacao', css_class='col-md-4'),
+                ),
+            ),
+            Fieldset(
+                'Informasaun Pessoal',
+                Row(
+                    Column('sexu', css_class='col-md-3'),
+                    Column('estadu_civil', css_class='col-md-3'),
+                    Column('data_moris', css_class='col-md-3'),
+                    Column('fatin_moris', css_class='col-md-3'),
+                ),
+                Row(
+                    Column('eleitoral_prof', css_class='col-md-6'),
+                    Column('nacionalidade', css_class='col-md-6'),
+                ),
+            ),
+            Fieldset(
+                'Enderesu & Kontatu',
+                Row(
+                    Column('distrito', css_class='col-md-6'),
+                    Column('subdistrito', css_class='col-md-6'),
+                ),
+                Row(
+                    Column('suco', css_class='col-md-6'),
+                    Column('aldeia', css_class='col-md-6'),
+                ),
+                Row(
+                    Column('kontatu', css_class='col-md-4'),
+                    Column('email', css_class='col-md-4'),
+                    Column('hela_fatin', css_class='col-md-4'),
+                ),
+            ),
+            Fieldset(
+                'Formasaun Akademiku',
+                Row(
+                    Column('nivel_akademiku', css_class='col-md-6'),
+                    Column('grau_akademiku', css_class='col-md-6'),
+                ),
+            ),
+            Fieldset('Foto', 'imagem'),
+            Submit('submit', 'Atualiza Perfil', css_class='btn btn-primary'),
+            HTML('<a href="javascript:history.back()" class="btn btn-outline-secondary ms-2">Kansela</a>'),
+        )
+
+
 class ProfessorMateriaForm(forms.ModelForm):
     class Meta:
         model = ProfessorMateria

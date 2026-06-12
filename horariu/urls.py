@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     HorasListView, HorasCreateView, HorasUpdateView, horas_delete_view,
     HorariuListView, HorariuCreateView, HorariuUpdateView, horariu_delete_view,
-    HorariuByTurmaView, HorariuByProfessorView,
+    HorariuByTurmaView, HorariuByProfessorView, HorariuHanorinView,
 )
 
 urlpatterns = [
@@ -13,6 +13,7 @@ urlpatterns = [
     path('horas/<int:pk>/eliminar/', horas_delete_view, name='horas-delete'),
 
     # Horariu special views (before pk-based patterns)
+    path('hanorin/', HorariuHanorinView.as_view(), name='horariu-hanorin'),
     path('turma/<int:classe_pk>/<int:turma_pk>/', HorariuByTurmaView.as_view(), name='horariu-by-turma'),
     path('professor/<int:professor_pk>/', HorariuByProfessorView.as_view(), name='horariu-by-professor'),
 

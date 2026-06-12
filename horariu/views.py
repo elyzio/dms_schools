@@ -152,6 +152,41 @@ class HorariuByTurmaView(LoginRequiredMixin, ListView):
         return ctx
 
 
+class HorariuHanorinView(LoginRequiredMixin, ListView):
+    """Personal schedule view for the logged-in teacher — no PK in the URL."""
+    model = Horariu
+    template_name = 'horariu/horariu/professor_detail.html'
+    context_object_name = 'horarios'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.groups.filter(name='professor').exists():
+            messages.error(request, 'Asesu la permiti.')
+            return redirect('dashboard')
+        try:
+            self._professor = request.user.professoruser.professor
+        except Exception:
+            messages.error(request, 'Perfil professor la hetan.')
+            return redirect('dashboard')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return Horariu.objects.filter(
+            professor_materia__professor=self._professor,
+            is_active=True,
+        ).select_related(
+            'horas', 'classe', 'turma', 'professor_materia__materia',
+        ).order_by('horas__horas_hahu')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        horas_qs = Horas.objects.all()
+        ctx['professor'] = self._professor
+        ctx['horas_list'] = horas_qs
+        ctx['dias'] = Horariu.LORON_CHOICES
+        ctx['grid'] = _build_grid(ctx['horarios'], horas_qs)
+        return ctx
+
+
 class HorariuByProfessorView(LoginRequiredMixin, ListView):
     model = Horariu
     template_name = 'horariu/horariu/professor_detail.html'

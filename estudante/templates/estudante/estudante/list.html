@@ -85,12 +85,14 @@
                     <th>Naran</th>
                     <th>EMIS</th>
                     <th>Sexu</th>
+                    <th>Klase Atual</th>
                     <th>Estadu</th>
                     <th class="text-end">Aksaun</th>
                 </tr>
             </thead>
             <tbody>
                 {% for est in estudantes %}
+                {% with cm=est.current_matricula|first %}
                 <tr>
                     <td>
                         <div class="d-flex align-items-center gap-2">
@@ -113,6 +115,14 @@
                     <td><span class="font-monospace small">{{ est.emis }}</span></td>
                     <td>{{ est.get_sexu_display }}</td>
                     <td>
+                        {% if cm %}
+                        <span class="fw-semibold">{{ cm.classe }}</span>
+                        <span class="text-muted small">{{ cm.turma }}</span>
+                        {% else %}
+                        <span class="text-muted small">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
                         {% if est.is_active %}
                         <span class="badge bg-success">Ativo</span>
                         {% elif est.is_transfer %}
@@ -134,6 +144,7 @@
                         </a>
                     </td>
                 </tr>
+                {% endwith %}
                 {% endfor %}
             </tbody>
         </table>

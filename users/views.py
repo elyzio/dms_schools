@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.shortcuts import redirect, render
 from django import forms
 from main.mixins import AdminRequiredMixin
+from funcionario.forms import ProfessorSelfUpdateForm
 from .forms import UserProfileForm, ProfilePasswordChangeForm
 
 
@@ -68,11 +69,34 @@ class UserProfileView(LoginRequiredMixin, View):
 class UserProfileUpdateView(LoginRequiredMixin, View):
     template_name = 'users/profiles/form.html'
 
+    def _is_teacher(self, request):
+        return request.user.groups.filter(name='professor').exists()
+
+    def _get_professor(self, request):
+        try:
+            return request.user.professoruser.professor
+        except Exception:
+            return None
+
     def get(self, request):
+        if self._is_teacher(request):
+            professor = self._get_professor(request)
+            if professor:
+                form = ProfessorSelfUpdateForm(instance=professor)
+                return render(request, self.template_name, {'form': form, 'is_professor': True})
         form = UserProfileForm(instance=request.user)
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
+        if self._is_teacher(request):
+            professor = self._get_professor(request)
+            if professor:
+                form = ProfessorSelfUpdateForm(request.POST, request.FILES, instance=professor)
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, 'Perfil atualiza ho susesu.')
+                    return redirect('user-profile')
+                return render(request, self.template_name, {'form': form, 'is_professor': True})
         form = UserProfileForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()

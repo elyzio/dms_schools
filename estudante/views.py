@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from custom.models import Departamento, Classe, Turma, Distrito
 from main.mixins import admin_required, not_teacher_required
 from .models import Estudante, EstudanteClasse, EstudanteTransfer
@@ -14,14 +14,14 @@ def estudante_list_view(request):
     if q:
         qs = qs.filter(Q(nome__icontains=q) | Q(emis__icontains=q))
 
+    # Matrikula filter scoped to the active academic year only
     matrikula = request.GET.get('matrikula', '').strip()
     if matrikula == 'yes':
-        qs = qs.filter(estudanteclasse__isnull=False)
+        qs = qs.filter(estudanteclasse__ano__is_active=True)
     elif matrikula == 'no':
-        qs = qs.filter(estudanteclasse__isnull=True)
+        qs = qs.exclude(estudanteclasse__ano__is_active=True)
 
-    # Department/classe/turma must match on the same matrikula record,
-    # so they're combined into a single filter() call (one join).
+    # Departamento/classe/turma filters all scoped to the active year (one join)
     matrikula_lookup = {}
     departamentu = request.GET.get('departamentu', '').strip()
     if departamentu:
@@ -33,11 +33,22 @@ def estudante_list_view(request):
     if turma:
         matrikula_lookup['estudanteclasse__turma_id'] = turma
     if matrikula_lookup:
+        matrikula_lookup['estudanteclasse__ano__is_active'] = True
         qs = qs.filter(**matrikula_lookup)
 
     distrito = request.GET.get('distrito', '').strip()
     if distrito:
         qs = qs.filter(distrito_id=distrito)
+
+    # Attach each student's current-year enrollment as a single-item list
+    current_year_prefetch = Prefetch(
+        'estudanteclasse_set',
+        queryset=EstudanteClasse.objects.filter(
+            ano__is_active=True
+        ).select_related('departamentu', 'classe', 'turma'),
+        to_attr='current_matricula',
+    )
+    qs = qs.prefetch_related(current_year_prefetch)
 
     return render(request, 'estudante/estudante/list.html', {
         'estudantes': qs.distinct(),
@@ -58,11 +69,11 @@ def estudante_list_view(request):
 @not_teacher_required
 def estudante_detail_view(request, pk):
     estudante = get_object_or_404(Estudante, pk=pk)
+    ec_base = estudante.estudanteclasse_set.select_related('ano', 'departamentu', 'classe', 'turma')
     return render(request, 'estudante/estudante/detail.html', {
         'estudante': estudante,
-        'classes': estudante.estudanteclasse_set.select_related(
-            'ano', 'classe', 'turma'
-        ).order_by('-ano__ano'),
+        'current_matricula': ec_base.filter(ano__is_active=True).first(),
+        'classes': ec_base.exclude(ano__is_active=True).order_by('-ano__ano'),
         'transfers': estudante.estudantetransfer_set.order_by('-data_transfer'),
     })
 
