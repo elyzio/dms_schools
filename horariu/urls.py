@@ -3,6 +3,7 @@ from .views import (
     HorasListView, HorasCreateView, HorasUpdateView, horas_delete_view,
     HorariuListView, HorariuCreateView, HorariuUpdateView, horariu_delete_view,
     HorariuByTurmaView, HorariuByProfessorView, HorariuHanorinView,
+    HorariuMasterTableView,
 )
 
 urlpatterns = [
@@ -14,6 +15,7 @@ urlpatterns = [
 
     # Horariu special views (before pk-based patterns)
     path('hanorin/', HorariuHanorinView.as_view(), name='horariu-hanorin'),
+    path('tabela/', HorariuMasterTableView.as_view(), name='horariu-master-table'),
     path('turma/<int:classe_pk>/<int:turma_pk>/', HorariuByTurmaView.as_view(), name='horariu-by-turma'),
     path('professor/<int:professor_pk>/', HorariuByProfessorView.as_view(), name='horariu-by-professor'),
 

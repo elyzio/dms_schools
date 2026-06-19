@@ -1,15 +1,26 @@
+from collections import OrderedDict, defaultdict
+
 from django.shortcuts import get_object_or_404, redirect
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.db.models import Q
 
 from main.mixins import AdminRequiredMixin, NotTeacherMixin, admin_required
-from custom.models import Classe, Turma
+from custom.models import Classe, Turma, Materia
 from funcionario.models import Professor
 from .models import Horas, Horariu
 from .forms import HorasForm, HorariuForm
+
+_MASTER_DAYS = [
+    ('SEG', 'Segunda-Feira'),
+    ('TER', 'Terça-Feira'),
+    ('QUA', 'Quarta-Feira'),
+    ('QUI', 'Kinta-Feira'),
+    ('SEX', 'Sexta-Feira'),
+    ('SAB', 'Sábado'),
+]
 
 
 # =============================================================================
@@ -207,4 +218,77 @@ class HorariuByProfessorView(LoginRequiredMixin, ListView):
         ctx['horas_list'] = horas_qs
         ctx['dias'] = Horariu.LORON_CHOICES
         ctx['grid'] = _build_grid(ctx['horarios'], horas_qs)
+        return ctx
+
+
+class HorariuMasterTableView(NotTeacherMixin, TemplateView):
+    template_name = 'horariu/horariu/master_table.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        day_order = {code: i for i, (code, _) in enumerate(_MASTER_DAYS)}
+
+        horarios = Horariu.objects.filter(is_active=True).select_related(
+            'horas', 'classe', 'turma', 'departamento',
+            'professor_materia__materia',
+        )
+
+        hours_map = OrderedDict()
+        grouped_rows = OrderedDict()
+        code_name_map = {}
+
+        for item in sorted(horarios, key=lambda h: (day_order[h.loron], h.horas.horas_hahu)):
+            hours_map.setdefault(item.horas_id, item.horas)
+            group_key = (item.classe_id, item.departamento_id)
+            group_data = grouped_rows.setdefault(group_key, {
+                'classe': item.classe,
+                'departamento': item.departamento,
+                'turmas': OrderedDict(),
+            })
+            cell_map = group_data['turmas'].setdefault(item.turma, defaultdict(set))
+            code = item.professor_materia.materia.codigo
+            code_name_map.setdefault(code, item.professor_materia.materia.materia)
+            cell_map[(item.loron, item.horas_id)].add(code)
+
+        hours = list(hours_map.values())
+        morning_hours = [h for h in hours if h.horas_hahu.hour < 12]
+        afternoon_hours = [h for h in hours if h.horas_hahu.hour >= 12]
+
+        def build_groups(hours_subset):
+            groups = []
+            for group_data in grouped_rows.values():
+                classe = group_data['classe']
+                departamento = group_data['departamento']
+                dept_code = (departamento.sigla or departamento.departamento or '').strip().lower()
+                rows = []
+                for turma, cell_map in group_data['turmas'].items():
+                    cells = []
+                    for day_code, _ in _MASTER_DAYS:
+                        for i, hour in enumerate(hours_subset):
+                            values = sorted(cell_map.get((day_code, hour.id), []))
+                            cells.append({
+                                'value': ' / '.join(values),
+                                'subject_names': ' / '.join(code_name_map.get(v, v) for v in values),
+                                'day_code': day_code,
+                                'is_day_start': i == 0,
+                            })
+                    rows.append({'turma': turma, 'cells': cells})
+                groups.append({'group_label': f"{classe.classe} {dept_code}".strip(), 'rows': rows})
+            return groups
+
+        materia_rows = []
+        materias = list(Materia.objects.order_by('codigo'))
+        for i in range(0, len(materias), 6):
+            chunk = materias[i:i + 6]
+            chunk += [None] * (6 - len(chunk))
+            materia_rows.append(chunk)
+
+        ctx.update({
+            'days': _MASTER_DAYS,
+            'materia_rows': materia_rows,
+            'sections': [
+                {'label': 'Dader', 'hours': morning_hours, 'groups': build_groups(morning_hours)},
+                {'label': 'Tarde', 'hours': afternoon_hours, 'groups': build_groups(afternoon_hours)},
+            ],
+        })
         return ctx
