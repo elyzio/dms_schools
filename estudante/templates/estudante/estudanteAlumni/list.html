@@ -1,0 +1,89 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Lista Alumni — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'estudante-list' %}">Estudante</a></li>
+<li class="breadcrumb-item active">Lista Alumni</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-list-ul me-2"></i>Lista Alumni</h5>
+    <div class="d-flex gap-2">
+        <a href="{% url 'estudante-alumni-candidates' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-mortarboard me-1"></i>Kandidatu Alumni
+        </a>
+        <a href="{% url 'estudante-list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Fila Ba Lista
+        </a>
+    </div>
+</div>
+
+<!-- Filter -->
+<form method="get" class="row gx-2 gy-2 align-items-end mb-3">
+    <div class="col-auto">
+        <label class="form-label small text-muted mb-1">Tinan Graduasaun</label>
+        <select name="ano" class="form-select form-select-sm">
+            <option value="">Hotu-hotu</option>
+            {% for a in ano_list %}
+            <option value="{{ a.id }}" {% if ano_filter == a.id|stringformat:"s" %}selected{% endif %}>{{ a.ano }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <label class="form-label small text-muted mb-1">Departamentu</label>
+        <select name="departamentu" class="form-select form-select-sm">
+            <option value="">Hotu-hotu</option>
+            {% for dep in departamentu_list %}
+            <option value="{{ dep.id }}" {% if departamentu_filter == dep.id|stringformat:"s" %}selected{% endif %}>{{ dep.departamento }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-outline-secondary btn-sm" type="submit">
+            <i class="bi bi-funnel me-1"></i>Filtra
+        </button>
+        {% if ano_filter or departamentu_filter %}
+        <a href="{% url 'estudante-alumni-list' %}" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-x"></i>
+        </a>
+        {% endif %}
+    </div>
+</form>
+
+<div class="card table-card">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Naran</th>
+                    <th>EMIS</th>
+                    <th>Departamentu</th>
+                    <th>Tinan Graduasaun</th>
+                    <th>Data Alumni</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for alum in alumni_history %}
+                <tr>
+                    <td>
+                        <a href="{% url 'estudante-detail' alum.estudante.pk %}" class="fw-semibold text-decoration-none">
+                            {{ alum.estudante.nome }}
+                        </a>
+                    </td>
+                    <td><span class="font-monospace small">{{ alum.estudante.emis }}</span></td>
+                    <td>{{ alum.departamentu_display|default:"—" }}</td>
+                    <td>{{ alum.ano.ano }}</td>
+                    <td>{{ alum.data_alumni }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">Seidauk iha alumni rejistadu.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

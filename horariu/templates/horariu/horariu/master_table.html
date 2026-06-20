@@ -1,0 +1,217 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Tabela Horariu Jerál — SI Schools{% endblock %}
+
+{% block extra_css %}
+<style>
+  .horariu-table-design {
+    --border: #1f1f1f;
+    --bg: #dedede;
+    --mon: #e8ef00;
+    --tue: #c40000;
+    --wed: #e8ef00;
+    --thu: #86c642;
+    --fri: #8fa4c7;
+    --sat: #6f2d9c;
+    padding: 0px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+  }
+
+  .horariu-table-design * {
+    box-sizing: border-box;
+  }
+
+  .horariu-table-design .section-block {
+    margin-bottom: 16px;
+  }
+
+  .horariu-table-design .schedule-table {
+    width: 100%;
+    min-width: 1220px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 12px;
+  }
+
+  .horariu-table-design .schedule-table th,
+  .horariu-table-design .schedule-table td {
+    border: 1px solid var(--border);
+    text-align: center;
+    height: 26px;
+    padding: 2px;
+    background: var(--bg);
+  }
+
+  .horariu-table-design .schedule-table thead th {
+    background: #fff;
+    font-weight: 600;
+    height: 30px;
+  }
+
+  .horariu-table-design th.col-classe,
+  .horariu-table-design td.col-classe {
+    width: 70px;
+    background: #fff;
+    font-weight: 600;
+  }
+
+  .horariu-table-design th.col-obs,
+  .horariu-table-design td.col-obs {
+    width: 55px;
+    background: #fff;
+  }
+
+  .horariu-table-design .day-cell {
+    width: 44px;
+    font-size: 11px;
+    line-height: 1.1;
+  }
+
+  .horariu-table-design .day-start {
+    border-left: 2px solid var(--border) !important;
+  }
+
+  .horariu-table-design .group-label {
+    background: #fff;
+    font-weight: 700;
+  }
+
+  .horariu-table-design .schedule-table td.day-mon { background: var(--mon) !important; }
+  .horariu-table-design .schedule-table td.day-tue { background: var(--tue) !important; color: #fff; }
+  .horariu-table-design .schedule-table td.day-wed { background: var(--wed) !important; }
+  .horariu-table-design .schedule-table td.day-thu { background: var(--thu) !important; }
+  .horariu-table-design .schedule-table td.day-fri { background: var(--fri) !important; }
+  .horariu-table-design .schedule-table td.day-sat { background: var(--sat) !important; color: #fff; }
+
+  .horariu-table-design .empty {
+    background: var(--bg);
+  }
+
+  .horariu-table-design .slot-value {
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  .horariu-table-design .legend {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #333;
+  }
+
+  .horariu-table-design .codigo-table {
+    min-width: 960px;
+    white-space: nowrap;
+  }
+
+  .horariu-table-design .codigo-table th,
+  .horariu-table-design .codigo-table td {
+    min-width: 320px;
+    white-space: nowrap !important;
+    text-align: left;
+  }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'horariu-list' %}">Horariu</a></li>
+<li class="breadcrumb-item active">Tabela Jerál</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0">
+        <i class="bi bi-grid-3x3 me-2"></i>Tabela Horariu Jerál
+    </h5>
+    <a href="{% url 'horariu-list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Fila Ba Lista
+    </a>
+</div>
+
+<div class="horariu-table-design">
+    {% for section in sections %}
+    <div class="card mb-3">
+        <div class="card-header fw-bold">Tabela {{ section.label }}</div>
+        <div class="card-body">
+            <div class="section-block">
+                {% if section.hours %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm mb-0 schedule-table">
+                        <thead>
+                            <tr>
+                                <th class="col-classe">Classe</th>
+                                {% for day_code, day_label in days %}
+                                <th class="day-start" colspan="{{ section.hours|length }}">{{ day_label }}</th>
+                                {% endfor %}
+                                <th class="col-obs day-start">OBS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for group in section.groups %}
+                            <tr>
+                                <td class="col-classe group-label">{{ group.group_label }}</td>
+                                {% for day_code, day_label in days %}
+                                    {% for hour in section.hours %}
+                                    <td class="day-cell {% if forloop.first %}day-start{% endif %} {% if day_code == 'SEG' %}day-mon{% elif day_code == 'TER' %}day-tue{% elif day_code == 'QUA' %}day-wed{% elif day_code == 'QUI' %}day-thu{% elif day_code == 'SEX' %}day-fri{% elif day_code == 'SAB' %}day-sat{% endif %}"></td>
+                                    {% endfor %}
+                                {% endfor %}
+                                <td class="col-obs day-start"></td>
+                            </tr>
+                            {% for row in group.rows %}
+                            <tr>
+                                <td class="col-classe">{{ row.turma.turma }}</td>
+                                {% for cell in row.cells %}
+                                <td class="day-cell empty {% if cell.is_day_start %}day-start{% endif %}">
+                                    {% if cell.value %}
+                                    <span class="slot-value" title="{{ cell.subject_names }}">{{ cell.value }}</span>
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                                <td class="col-obs day-start"></td>
+                            </tr>
+                            {% endfor %}
+                            {% empty %}
+                            <tr>
+                                <td class="col-classe">-</td>
+                                <td colspan="{{ days|length }}" class="empty">Laiha dadus horariu</td>
+                                <td class="col-obs day-start"></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="legend">
+                    Oras order: {% for hour in section.hours %}{{ hour.horas_hahu|time:'H:i' }}-{{ hour.horas_termina|time:'H:i' }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                </div>
+                {% else %}
+                <div class="legend">Laiha oras ba {{ section.label|lower }} schedule.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="card">
+    <div class="card-header fw-bold">Codigo Disciplina</div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm small mb-0 codigo-table">
+                <tbody>
+                    {% for row in materia_rows %}
+                    <tr>
+                        {% for mt in row %}
+                        <td>
+                            {% if mt %}
+                            <strong>{{ mt.codigo }}</strong> - {{ mt.materia }}
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
