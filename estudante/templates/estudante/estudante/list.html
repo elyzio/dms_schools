@@ -9,9 +9,20 @@
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
     <h5 class="fw-bold mb-0"><i class="bi bi-person-vcard me-2"></i>Lista Estudante</h5>
-    <a href="{% url 'estudante-create' %}" class="btn btn-primary btn-sm">
-        <i class="bi bi-plus-lg me-1"></i>Estudante Foun
-    </a>
+    <div class="d-flex gap-2">
+        <a href="{% url 'estudante-passa-list' %}" class="btn btn-outline-success btn-sm">
+            <i class="bi bi-check2-circle me-1"></i>Estudante Passa
+        </a>
+        <a href="{% url 'estudante-reinskrisaun-list' %}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-arrow-repeat me-1"></i>Reinskrisaun Estudante
+        </a>
+        <a href="{% url 'estudante-alumni-candidates' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-mortarboard me-1"></i>Alumni
+        </a>
+        <a href="{% url 'estudante-create' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i>Estudante Foun
+        </a>
+    </div>
 </div>
 
 <!-- Search & Filter -->
@@ -134,6 +145,21 @@
                         {% endif %}
                     </td>
                     <td class="text-end">
+                        {% if cm %}
+                            {% if cm.is_passa %}
+                            <span class="btn btn-sm btn-success disabled" title="Estudante passa ona">
+                                <i class="bi bi-check2-circle"></i>
+                            </span>
+                            {% else %}
+                            <form method="post" action="{% url 'estudante-passa' est.pk %}" class="d-inline"
+                                  onsubmit="return confirm('Marka {{ est.nome }} \'Passa\' ba tinan ne\'e?')">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-success" title="Marka Passa">
+                                    <i class="bi bi-arrow-up-circle"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        {% endif %}
                         <a href="{% url 'estudante-detail' est.pk %}"
                            class="btn btn-sm btn-outline-primary">
                             <i class="bi bi-eye"></i>

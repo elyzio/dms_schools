@@ -13,7 +13,7 @@ class EstudanteForm(forms.ModelForm):
             'data_moris', 'fatin_moris', 'nacionalidade',
             'distrito', 'subdistrito', 'suco', 'aldeia',
             'kontatu', 'hela_fatin',
-            'is_active', 'is_transfer', 'is_alumni', 'data_matricula',
+            'is_active', 'is_transfer', 'data_matricula',
             'imagem',
         ]
         widgets = {
@@ -62,10 +62,9 @@ class EstudanteForm(forms.ModelForm):
             Fieldset(
                 'Estadu',
                 Row(
-                    Column('is_active', css_class='col-md-3'),
-                    Column('is_transfer', css_class='col-md-3'),
-                    Column('is_alumni', css_class='col-md-3'),
-                    Column('data_matricula', css_class='col-md-3'),
+                    Column('is_active', css_class='col-md-4'),
+                    Column('is_transfer', css_class='col-md-4'),
+                    Column('data_matricula', css_class='col-md-4'),
                 ),
             ),
             Fieldset(
