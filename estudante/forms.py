@@ -81,7 +81,8 @@ class EstudanteClasseForm(forms.ModelForm):
         model = EstudanteClasse
         fields = [
             'ano', 'departamentu', 'classe', 'turma',
-            'data_enrollment', 'is_mid_year_transfer', 'starting_period',
+            'data_enrollment', 'is_mid_year_transfer', 
+            # 'starting_period',
         ]
         widgets = {
             'data_enrollment': forms.DateInput(attrs={'type': 'date'}),
@@ -107,7 +108,7 @@ class EstudanteClasseForm(forms.ModelForm):
             ),
             Row(
                 Column('data_enrollment', css_class='col-md-4'),
-                Column('starting_period', css_class='col-md-4'),
+                # Column('starting_period', css_class='col-md-4'),
                 Column('is_mid_year_transfer', css_class='col-md-4'),
             ),
             Submit('submit', 'Matrikula', css_class='btn btn-primary'),

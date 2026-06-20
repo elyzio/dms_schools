@@ -70,7 +70,7 @@ class EstudanteClasse(models.Model):
     obs_passa = models.TextField(blank=True, help_text="Observasaun kona-ba aprovasaun")
     data_enrollment = models.DateField(default=timezone.now)
     is_mid_year_transfer = models.BooleanField(default=False, help_text="Estudante transfere iha klaran tinan?")
-    starting_period = models.IntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(3)], help_text="Período ne'ebé estudante hahu inskrisaun (1=P1, 2=P2, 3=P3)")
+    starting_period = models.IntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(3)], help_text="Período ne'ebé estudante hahu inskrisaun (1=P1, 2=P2, 3=P3)", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

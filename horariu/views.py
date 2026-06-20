@@ -31,6 +31,11 @@ class HorasListView(NotTeacherMixin, ListView):
     model = Horas
     template_name = 'horariu/horas/list.html'
     context_object_name = 'horas_list'
+    ordering = ['horas_hahu']
+
+    # def get_queryset(self):
+    #     qs = Horas.objects.all().order_by('horas_hahu')
+    #     return qs
 
 
 class HorasCreateView(AdminRequiredMixin, CreateView):
