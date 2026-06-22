@@ -7,6 +7,7 @@ from .views import (
     estudante_passa_view, estudante_passa_list_view,
     estudante_reinskrisaun_list_view,
     estudante_alumni_candidates_view, estudante_alumni_list_view, estudante_alumni_create_view,
+    estudante_classe_view,
 )
 
 urlpatterns = [
@@ -16,6 +17,7 @@ urlpatterns = [
     path('reinskrisaun/', estudante_reinskrisaun_list_view, name='estudante-reinskrisaun-list'),
     path('alumni/', estudante_alumni_candidates_view, name='estudante-alumni-candidates'),
     path('alumni/lista/', estudante_alumni_list_view, name='estudante-alumni-list'),
+    path('minha-klase/', estudante_classe_view, name='estudante-classe-list'),
     path('<int:pk>/', estudante_detail_view, name='estudante-detail'),
     path('<int:pk>/editar/', estudante_update_view, name='estudante-update'),
     path('<int:pk>/eliminar/', estudante_delete_view, name='estudante-delete'),

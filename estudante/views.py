@@ -3,7 +3,8 @@ from django.contrib import messages
 from django.db.models import Q, Prefetch
 from django.utils import timezone
 from custom.models import Departamento, Classe, Turma, Distrito, Ano
-from main.mixins import admin_required, not_teacher_required
+from main.mixins import admin_required, not_teacher_required, teacher_required
+from funcionario.models import ProfessorClasse
 from .models import Estudante, EstudanteClasse, EstudanteTransfer, EstudanteAlumni
 from .forms import EstudanteForm, EstudanteClasseForm, EstudanteTransferForm
 
@@ -290,4 +291,38 @@ def estudante_alumni_list_view(request):
         'departamentu_filter': departamentu_filter,
         'ano_list': Ano.objects.order_by('-ano'),
         'departamentu_list': Departamento.objects.all(),
+    })
+
+
+# =============================================================================
+# ESTUDANTE BA PROFESSOR (Teacher's own class roster — view-only)
+# =============================================================================
+
+@teacher_required
+def estudante_classe_view(request):
+    try:
+        professor = request.user.professoruser.professor
+    except Exception:
+        messages.error(request, 'Perfil professor la hetan.')
+        return redirect('dashboard')
+
+    active_ano = Ano.objects.filter(is_active=True).first()
+    pairs = []
+    if active_ano:
+        pairs = list(ProfessorClasse.objects.filter(
+            professor=professor, ano=active_ano,
+        ).values_list('classe_id', 'turma_id'))
+
+    estudantes = EstudanteClasse.objects.none()
+    if pairs:
+        q = Q()
+        for classe_id, turma_id in pairs:
+            q |= Q(classe_id=classe_id, turma_id=turma_id)
+        estudantes = EstudanteClasse.objects.filter(q, ano=active_ano).select_related(
+            'estudante', 'classe', 'turma', 'departamentu',
+        ).order_by('classe__classe', 'turma__turma', 'estudante__nome')
+
+    return render(request, 'estudante/estudanteClasse/professor_list.html', {
+        'estudantes': estudantes,
+        'has_assignment': bool(pairs),
     })

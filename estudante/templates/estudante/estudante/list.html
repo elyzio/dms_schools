@@ -1,4 +1,5 @@
 {% extends 'main/base.html' %}
+{% load role_tags %}
 
 {% block title %}Estudante — SI Schools{% endblock %}
 
@@ -19,9 +20,11 @@
         <a href="{% url 'estudante-alumni-candidates' %}" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-mortarboard me-1"></i>Alumni
         </a>
+        {% if request.user|is_admin %}
         <a href="{% url 'estudante-create' %}" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-lg me-1"></i>Estudante Foun
         </a>
+        {% endif %}
     </div>
 </div>
 
@@ -150,7 +153,7 @@
                             <span class="btn btn-sm btn-success disabled" title="Estudante passa ona">
                                 <i class="bi bi-check2-circle"></i>
                             </span>
-                            {% else %}
+                            {% elif request.user|is_admin %}
                             <form method="post" action="{% url 'estudante-passa' est.pk %}" class="d-inline"
                                   onsubmit="return confirm('Marka {{ est.nome }} \'Passa\' ba tinan ne\'e?')">
                                 {% csrf_token %}
@@ -164,10 +167,12 @@
                            class="btn btn-sm btn-outline-primary">
                             <i class="bi bi-eye"></i>
                         </a>
+                        {% if request.user|is_admin %}
                         <a href="{% url 'estudante-update' est.pk %}"
                            class="btn btn-sm btn-outline-secondary">
                             <i class="bi bi-pencil"></i>
                         </a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endwith %}

@@ -62,3 +62,16 @@ def not_teacher_required(view_func):
             return redirect('dashboard')
         return view_func(request, *args, **kwargs)
     return wrapper
+
+
+def teacher_required(view_func):
+    """Allow only Teacher (professor group) users."""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path(), settings.LOGIN_URL)
+        if not _is_teacher(request.user):
+            messages.error(request, 'Asesu la permiti.')
+            return redirect('dashboard')
+        return view_func(request, *args, **kwargs)
+    return wrapper

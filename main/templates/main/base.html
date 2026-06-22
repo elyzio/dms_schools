@@ -140,6 +140,12 @@
         {% endif %}
 
         {% if request.user|is_teacher %}
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'estudante-classe-list' %}active{% endif %}"
+               href="{% url 'estudante-classe-list' %}">
+                <i class="bi bi-person-vcard"></i>Estudante
+            </a>
+        </li>
         {% if teacher_horariu_professor_pk %}
         <li class="nav-item">
             <a class="nav-link {% if 'horariu' in request.path %}active{% endif %}"
@@ -294,6 +300,12 @@
         {% if request.user|is_teacher %}
         <li class="nav-item mt-2">
             <small class="text-muted px-3 text-uppercase" style="font-size:0.7rem;letter-spacing:.05em;">Konta</small>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'estudante-classe-list' %}active{% endif %}"
+               href="{% url 'estudante-classe-list' %}">
+                <i class="bi bi-person-vcard"></i>Estudante
+            </a>
         </li>
         {% if teacher_horariu_professor_pk %}
         <li class="nav-item">
