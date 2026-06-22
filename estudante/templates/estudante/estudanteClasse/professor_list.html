@@ -1,0 +1,50 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Estudante — Klase Ha'u — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Estudante — Klase Ha'u</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-person-vcard me-2"></i>Estudante — Klase Ha'u</h5>
+</div>
+
+{% if not has_assignment %}
+<div class="alert alert-warning">
+    Ita boot seidauk hetan atribuisaun hanesan professor da turma ba turma ida.
+</div>
+{% else %}
+<div class="card table-card">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Naran</th>
+                    <th>EMIS</th>
+                    <th>Klase</th>
+                    <th>Turma</th>
+                    <th>Departamentu</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ec in estudantes %}
+                <tr>
+                    <td class="fw-semibold">{{ ec.estudante.nome }}</td>
+                    <td><span class="font-monospace small">{{ ec.estudante.emis }}</span></td>
+                    <td>{{ ec.classe }}</td>
+                    <td>{{ ec.turma }}</td>
+                    <td>{{ ec.departamentu }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">Seidauk iha estudante.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
