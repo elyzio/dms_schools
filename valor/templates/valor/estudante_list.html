@@ -30,6 +30,29 @@
     </div>
 </form>
 
+{% if is_admin_view and periodo %}
+<div class="d-flex gap-2 mb-3">
+    <form method="post" action="{% url 'valor-lock-bulk' pm.pk %}" class="d-inline"
+          onsubmit="return confirm('Lock valor hotu-hotu ba {{ pm.materia }} — {{ periodo.periodo }}?')">
+        {% csrf_token %}
+        <input type="hidden" name="periodo" value="{{ periodo.pk }}">
+        <input type="hidden" name="action" value="lock">
+        <button type="submit" class="btn btn-sm btn-outline-warning">
+            <i class="bi bi-lock-fill me-1"></i>Lock Periodo Ne'e
+        </button>
+    </form>
+    <form method="post" action="{% url 'valor-lock-bulk' pm.pk %}" class="d-inline"
+          onsubmit="return confirm('Loke valor hotu-hotu ba {{ pm.materia }} — {{ periodo.periodo }}?')">
+        {% csrf_token %}
+        <input type="hidden" name="periodo" value="{{ periodo.pk }}">
+        <input type="hidden" name="action" value="unlock">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-unlock-fill me-1"></i>Loke Periodo Ne'e
+        </button>
+    </form>
+</div>
+{% endif %}
+
 <div class="card table-card">
     <div class="card-header bg-white fw-semibold">
         Estudante — {{ periodo.periodo|default:"—" }} ({{ active_ano.ano }})
@@ -56,6 +79,7 @@
                     <td>
                         {% if ec.valor_atual %}
                         <span class="badge bg-success">{{ ec.valor_atual.valor }} ({{ ec.valor_atual.por_extenso }})</span>
+                        {% if ec.valor_atual.is_lock %}<i class="bi bi-lock-fill text-warning ms-1" title="Lock"></i>{% endif %}
                         {% else %}
                         <span class="badge bg-secondary">Seidauk</span>
                         {% endif %}

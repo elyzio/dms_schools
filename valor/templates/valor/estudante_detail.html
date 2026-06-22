@@ -1,4 +1,5 @@
 {% extends 'main/base.html' %}
+{% load role_tags %}
 
 {% block title %}Valor — {{ estudante.nome }} — SI Schools{% endblock %}
 
@@ -51,28 +52,60 @@
                             <th>Valor</th>
                             <th>Por Extenso</th>
                             <th>Observasaun</th>
+                            {% if request.user|is_admin %}<th class="text-end">Aksaun</th>{% endif %}
                         </tr>
                     </thead>
                     <tbody>
-                        {% for v in pt.valores %}
+                        {% for row in pt.rows %}
                         <tr>
-                            <td>{{ v.materia }}</td>
-                            <td>{{ v.valor }}</td>
-                            <td>{{ v.por_extenso }}</td>
-                            <td>{{ v.obs|default:"—" }}</td>
+                            <td>{{ row.materia }}</td>
+                            <td>{{ row.valor.valor|default:"—" }}</td>
+                            <td>{{ row.valor.por_extenso|default:"—" }}</td>
+                            <td>{{ row.valor.obs|default:"—" }}</td>
+                            {% if request.user|is_admin %}
+                            <td class="text-end">
+                                {% if row.valor %}
+                                <a href="{% url 'valor-input' cls.ec.pk row.materia.pk pt.periodo.pk %}"
+                                   class="btn btn-sm btn-outline-secondary" title="Atualiza">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post" action="{% url 'valor-delete' row.valor.pk %}" class="d-inline"
+                                      onsubmit="return confirm('Hamoos valor ne\'e?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Hamoos">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'valor-row-lock-toggle' row.valor.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-warning"
+                                            title="{% if row.valor.is_lock %}Loke{% else %}Lock{% endif %}">
+                                        <i class="bi {% if row.valor.is_lock %}bi-unlock-fill{% else %}bi-lock-fill{% endif %}"></i>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <a href="{% url 'valor-input' cls.ec.pk row.materia.pk pt.periodo.pk %}"
+                                   class="btn btn-sm btn-outline-primary" title="Aumenta">
+                                    <i class="bi bi-plus-lg"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                            {% endif %}
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="4" class="text-center text-muted py-3">Seidauk iha valor ba periodo ne'e.</td>
+                            <td colspan="{% if request.user|is_admin %}5{% else %}4{% endif %}" class="text-center text-muted py-3">
+                                Seidauk iha materia ba klase ne'e.
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
-                    {% if pt.valores %}
+                    {% if pt.rows %}
                     <tfoot>
                         <tr class="fw-semibold">
                             <td>Total / Média</td>
                             <td>{{ pt.total|floatformat:2 }}</td>
-                            <td colspan="2">{{ pt.media|floatformat:2 }}</td>
+                            <td colspan="{% if request.user|is_admin %}3{% else %}2{% endif %}">{{ pt.media|floatformat:2 }}</td>
                         </tr>
                     </tfoot>
                     {% endif %}

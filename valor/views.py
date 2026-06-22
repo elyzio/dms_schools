@@ -5,7 +5,9 @@ from django.db.models import Sum, Avg
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
-from main.mixins import teacher_required, not_teacher_required
+from main.mixins import (
+    not_teacher_required, admin_required, teacher_or_admin_required, _is_admin,
+)
 from custom.models import Ano, Periodo, Materia
 from estudante.models import Estudante, EstudanteClasse
 from funcionario.models import ProfessorMateria
@@ -13,7 +15,7 @@ from funcionario.models import ProfessorMateria
 from .models import Valor
 from .forms import ValorForm
 from .utils import valor_extenso
-from .services import valor_completion_status
+from .services import valor_completion_status, required_materias_for
 
 
 def _get_professor(request):
@@ -24,31 +26,44 @@ def _get_professor(request):
 
 
 # =============================================================================
-# PROFESSOR INPUT FLOW
+# PROFESSOR INPUT FLOW (also reachable by Admin, for overrides)
 # =============================================================================
 
-@teacher_required
+@teacher_or_admin_required
 def valor_materia_list_view(request):
-    professor = _get_professor(request)
-    if not professor:
-        messages.error(request, 'Perfil professor la hetan.')
-        return redirect('dashboard')
+    is_admin_user = _is_admin(request.user)
 
-    materias = ProfessorMateria.objects.filter(
-        professor=professor, is_active=True,
-    ).select_related('materia', 'classe').order_by('classe__classe', 'materia__codigo')
+    if is_admin_user:
+        materias = ProfessorMateria.objects.filter(
+            is_active=True,
+        ).select_related('professor', 'materia', 'classe').order_by('classe__classe', 'materia__codigo')
+    else:
+        professor = _get_professor(request)
+        if not professor:
+            messages.error(request, 'Perfil professor la hetan.')
+            return redirect('dashboard')
+        materias = ProfessorMateria.objects.filter(
+            professor=professor, is_active=True,
+        ).select_related('materia', 'classe').order_by('classe__classe', 'materia__codigo')
 
-    return render(request, 'valor/materia_list.html', {'materias': materias})
+    return render(request, 'valor/materia_list.html', {
+        'materias': materias, 'is_admin_view': is_admin_user,
+    })
 
 
-@teacher_required
+@teacher_or_admin_required
 def valor_estudante_list_view(request, pm_pk):
-    professor = _get_professor(request)
-    if not professor:
-        messages.error(request, 'Perfil professor la hetan.')
-        return redirect('dashboard')
+    is_admin_user = _is_admin(request.user)
 
-    pm = get_object_or_404(ProfessorMateria, pk=pm_pk, professor=professor, is_active=True)
+    if is_admin_user:
+        pm = get_object_or_404(ProfessorMateria, pk=pm_pk, is_active=True)
+    else:
+        professor = _get_professor(request)
+        if not professor:
+            messages.error(request, 'Perfil professor la hetan.')
+            return redirect('dashboard')
+        pm = get_object_or_404(ProfessorMateria, pk=pm_pk, professor=professor, is_active=True)
+
     active_ano = Ano.objects.filter(is_active=True).first()
 
     periodo = None
@@ -83,28 +98,39 @@ def valor_estudante_list_view(request, pm_pk):
         'periodo': periodo,
         'periodo_list': Periodo.objects.order_by('id'),
         'active_ano': active_ano,
+        'is_admin_view': is_admin_user,
     })
 
 
-@teacher_required
+@teacher_or_admin_required
 def valor_input_view(request, estudante_classe_pk, materia_pk, periodo_pk):
-    professor = _get_professor(request)
-    if not professor:
-        messages.error(request, 'Perfil professor la hetan.')
-        return redirect('dashboard')
+    is_admin_user = _is_admin(request.user)
 
     ec = get_object_or_404(EstudanteClasse, pk=estudante_classe_pk)
     materia = get_object_or_404(Materia, pk=materia_pk)
     periodo = get_object_or_404(Periodo, pk=periodo_pk)
-    pm = get_object_or_404(
-        ProfessorMateria, professor=professor, materia=materia, classe=ec.classe, is_active=True,
-    )
+
+    pm = None
+    if not is_admin_user:
+        professor = _get_professor(request)
+        if not professor:
+            messages.error(request, 'Perfil professor la hetan.')
+            return redirect('dashboard')
+        pm = get_object_or_404(
+            ProfessorMateria, professor=professor, materia=materia, classe=ec.classe, is_active=True,
+        )
+
+    def _back_redirect():
+        if is_admin_user:
+            return redirect('valor-estudante-detail', estudante_pk=ec.estudante_id)
+        list_url = reverse('valor-estudante-list', kwargs={'pm_pk': pm.pk})
+        return redirect(f"{list_url}?periodo={periodo.pk}")
 
     valor_obj = Valor.objects.filter(estudante_classe=ec, materia=materia, periodo=periodo).first()
 
     if valor_obj and valor_obj.is_lock:
-        messages.error(request, "Valor ne'e selu ona — labele edita.")
-        return redirect('valor-estudante-list', pm_pk=pm.pk)
+        messages.error(request, "Valor ne'e lock ona — labele edita.")
+        return _back_redirect()
 
     if request.method == 'POST':
         form = ValorForm(request.POST, instance=valor_obj)
@@ -115,8 +141,7 @@ def valor_input_view(request, estudante_classe_pk, materia_pk, periodo_pk):
             form.instance.por_extenso = valor_extenso(form.cleaned_data['valor'])
             form.save()
             messages.success(request, f"Valor ba {ec.estudante.nome} grava ona.")
-            list_url = reverse('valor-estudante-list', kwargs={'pm_pk': pm.pk})
-            return redirect(f"{list_url}?periodo={periodo.pk}")
+            return _back_redirect()
     else:
         form = ValorForm(instance=valor_obj)
 
@@ -126,7 +151,54 @@ def valor_input_view(request, estudante_classe_pk, materia_pk, periodo_pk):
 
 
 # =============================================================================
-# REVIEW FLOW (read-only, from student detail)
+# ADMIN OVERRIDES — delete / lock toggles
+# =============================================================================
+
+@admin_required
+def valor_delete_view(request, valor_pk):
+    valor = get_object_or_404(Valor, pk=valor_pk)
+    estudante_pk = valor.estudante_classe.estudante_id
+    if request.method == 'POST':
+        if valor.is_lock:
+            messages.error(request, "Valor ne'e lock ona — labele hamoos.")
+        else:
+            valor.delete()
+            messages.success(request, 'Valor hamoos ona.')
+    return redirect('valor-estudante-detail', estudante_pk=estudante_pk)
+
+
+@admin_required
+def valor_row_lock_toggle_view(request, valor_pk):
+    valor = get_object_or_404(Valor, pk=valor_pk)
+    if request.method == 'POST':
+        valor.is_lock = not valor.is_lock
+        valor.save(update_fields=['is_lock'])
+        messages.success(request, "Valor lock ona." if valor.is_lock else "Valor loke ona.")
+    return redirect('valor-estudante-detail', estudante_pk=valor.estudante_classe.estudante_id)
+
+
+@admin_required
+def valor_lock_bulk_view(request, pm_pk):
+    pm = get_object_or_404(ProfessorMateria, pk=pm_pk, is_active=True)
+    if request.method == 'POST':
+        periodo = get_object_or_404(Periodo, pk=request.POST.get('periodo'))
+        action = request.POST.get('action')
+        qs = Valor.objects.filter(
+            materia=pm.materia, estudante_classe__classe=pm.classe, periodo=periodo,
+        )
+        if action == 'lock':
+            updated = qs.update(is_lock=True)
+            messages.success(request, f"Valor {updated} lock ona ba {pm.materia} — {periodo.periodo}.")
+        elif action == 'unlock':
+            updated = qs.update(is_lock=False)
+            messages.success(request, f"Valor {updated} loke ona ba {pm.materia} — {periodo.periodo}.")
+        list_url = reverse('valor-estudante-list', kwargs={'pm_pk': pm.pk})
+        return redirect(f"{list_url}?periodo={periodo.pk}")
+    return redirect('valor-estudante-list', pm_pk=pm.pk)
+
+
+# =============================================================================
+# REVIEW FLOW (read-only, from student detail — Admin gets extra action icons)
 # =============================================================================
 
 @not_teacher_required
@@ -139,17 +211,19 @@ def valor_estudante_detail_view(request, estudante_pk):
     periodos = list(Periodo.objects.order_by('id'))
     class_data = []
     for ec in classes:
+        materias = list(required_materias_for(ec).order_by('codigo'))
         periodo_tables = []
         chart_labels = []
         chart_averages = []
         for periodo in periodos:
-            valores = Valor.objects.filter(estudante_classe=ec, periodo=periodo).select_related(
-                'materia',
-            ).order_by('materia__codigo')
+            valores = Valor.objects.filter(estudante_classe=ec, periodo=periodo).select_related('materia')
             agg = valores.aggregate(total=Sum('valor'), media=Avg('valor'))
+            valor_map = {v.materia_id: v for v in valores}
+            rows = [{'materia': m, 'valor': valor_map.get(m.id)} for m in materias]
+
             periodo_tables.append({
                 'periodo': periodo,
-                'valores': valores,
+                'rows': rows,
                 'total': agg['total'],
                 'media': agg['media'],
             })

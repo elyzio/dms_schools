@@ -1,14 +1,16 @@
 {% extends 'main/base.html' %}
 
-{% block title %}Valor — Materia Ha'u — SI Schools{% endblock %}
+{% block title %}Valor — Materia{% if not is_admin_view %} Ha'u{% endif %} — SI Schools{% endblock %}
 
 {% block breadcrumb %}
-<li class="breadcrumb-item active">Valor — Materia Ha'u</li>
+<li class="breadcrumb-item active">Valor — Materia{% if not is_admin_view %} Ha'u{% endif %}</li>
 {% endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
-    <h5 class="fw-bold mb-0"><i class="bi bi-journal-check me-2"></i>Valor — Materia Ha'u</h5>
+    <h5 class="fw-bold mb-0">
+        <i class="bi bi-journal-check me-2"></i>Valor — Materia{% if not is_admin_view %} Ha'u{% endif %}
+    </h5>
 </div>
 
 <div class="card table-card">
@@ -17,6 +19,7 @@
             <thead class="table-light">
                 <tr>
                     <th>Materia</th>
+                    {% if is_admin_view %}<th>Professor</th>{% endif %}
                     <th>Klase</th>
                     <th>Departamentu</th>
                     <th class="text-end">Aksaun</th>
@@ -26,6 +29,7 @@
                 {% for pm in materias %}
                 <tr>
                     <td class="fw-semibold">{{ pm.materia }}</td>
+                    {% if is_admin_view %}<td>{{ pm.professor }}</td>{% endif %}
                     <td>{{ pm.classe }}</td>
                     <td>{{ pm.materia.departamentu|default:"Jerál" }}</td>
                     <td class="text-end">
@@ -36,7 +40,9 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center text-muted py-4">Seidauk iha materia atribui ba ita boot.</td>
+                    <td colspan="{% if is_admin_view %}5{% else %}4{% endif %}" class="text-center text-muted py-4">
+                        Seidauk iha materia atribui.
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
