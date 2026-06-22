@@ -1,0 +1,36 @@
+{% extends 'main/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Fo Valor — {{ ec.estudante.nome }} — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'valor-materia-list' %}">Valor</a></li>
+<li class="breadcrumb-item"><a href="{% url 'valor-estudante-list' pm.pk %}">{{ pm.materia }} — {{ pm.classe }}</a></li>
+<li class="breadcrumb-item active">{{ ec.estudante.nome }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-pencil-square me-2"></i>Fo Valor — {{ ec.estudante.nome }}</h5>
+    <a href="{% url 'valor-estudante-list' pm.pk %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Fila
+    </a>
+</div>
+
+<div class="card shadow-sm" style="max-width: 520px;">
+    <div class="card-body">
+        <dl class="row mb-3">
+            <dt class="col-sm-4 text-muted">Materia</dt>
+            <dd class="col-sm-8">{{ materia }}</dd>
+            <dt class="col-sm-4 text-muted">Klase</dt>
+            <dd class="col-sm-8">{{ ec.classe }} {{ ec.turma }}</dd>
+            <dt class="col-sm-4 text-muted">Periodo</dt>
+            <dd class="col-sm-8">{{ periodo.periodo }}</dd>
+        </dl>
+        <form method="post">
+            {% csrf_token %}
+            {% crispy form %}
+        </form>
+    </div>
+</div>
+{% endblock %}

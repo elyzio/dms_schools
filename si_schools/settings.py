@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'users',
     'report',
     'horariu',
+    'valor',
 ]
 
 MIDDLEWARE = [

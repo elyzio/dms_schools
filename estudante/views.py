@@ -7,6 +7,7 @@ from main.mixins import admin_required, not_teacher_required, teacher_required
 from funcionario.models import ProfessorClasse
 from .models import Estudante, EstudanteClasse, EstudanteTransfer, EstudanteAlumni
 from .forms import EstudanteForm, EstudanteClasseForm, EstudanteTransferForm
+from valor.services import valor_completion_status
 
 
 @not_teacher_required
@@ -167,9 +168,17 @@ def estudante_passa_view(request, pk):
     if request.method == 'POST':
         cm = estudante.estudanteclasse_set.filter(ano__is_active=True).first()
         if cm:
-            cm.is_passa = True
-            cm.save(update_fields=['is_passa'])
-            messages.success(request, f'{estudante.nome} marka ona "Passa" ba tinan ne\'e.')
+            status = valor_completion_status(cm)
+            if not status['complete']:
+                messages.error(
+                    request,
+                    f"{estudante.nome} seidauk kompleta valor husi hotu-hotu periodo/materia "
+                    f"({status['filled']}/{status['required']}).",
+                )
+            else:
+                cm.is_passa = True
+                cm.save(update_fields=['is_passa'])
+                messages.success(request, f'{estudante.nome} marka ona "Passa" ba tinan ne\'e.')
         else:
             messages.error(request, f'{estudante.nome} seidauk iha matrikula ba ano atuál.')
     return redirect('estudante-passa-list')
@@ -246,14 +255,26 @@ def estudante_alumni_candidates_view(request):
 def estudante_alumni_create_view(request, pk):
     estudante = get_object_or_404(Estudante, pk=pk)
     if request.method == 'POST':
-        active_ano = Ano.objects.filter(is_active=True).first()
-        EstudanteAlumni.objects.create(
-            estudante=estudante, data_alumni=timezone.now().date(), ano=active_ano,
-        )
-        estudante.is_alumni = True
-        estudante.is_active = False
-        estudante.save(update_fields=['is_alumni', 'is_active'])
-        messages.success(request, f'{estudante.nome} hatama ona ba Alumni.')
+        incomplete = []
+        for ec in estudante.estudanteclasse_set.select_related('classe'):
+            status = valor_completion_status(ec)
+            if not status['complete']:
+                incomplete.append(f"{ec.classe} ({status['filled']}/{status['required']})")
+
+        if incomplete:
+            messages.error(
+                request,
+                f"{estudante.nome} seidauk kompleta valor husi klase: {', '.join(incomplete)}.",
+            )
+        else:
+            active_ano = Ano.objects.filter(is_active=True).first()
+            EstudanteAlumni.objects.create(
+                estudante=estudante, data_alumni=timezone.now().date(), ano=active_ano,
+            )
+            estudante.is_alumni = True
+            estudante.is_active = False
+            estudante.save(update_fields=['is_alumni', 'is_active'])
+            messages.success(request, f'{estudante.nome} hatama ona ba Alumni.')
     return redirect('estudante-alumni-candidates')
 
 
