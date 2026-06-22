@@ -35,6 +35,7 @@
                     <th>EMIS</th>
                     <th>Turma {{ last_ano.ano }}</th>
                     <th>Departamentu</th>
+                    <th>Estadu</th>
                     <th class="text-end">Aksaun</th>
                 </tr>
             </thead>
@@ -45,10 +46,32 @@
                     <td><span class="font-monospace small">{{ ec.estudante.emis }}</span></td>
                     <td>{{ ec.turma }}</td>
                     <td>{{ ec.departamentu }}</td>
+                    <td>
+                        {% if ec.is_passa %}
+                        <span class="badge bg-success">Passa</span>
+                        {% elif ec.is_passa is False %}
+                        <span class="badge bg-warning text-dark">Repete</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Pendente</span>
+                        {% endif %}
+                    </td>
                     <td class="text-end">
-                        <a href="{% url 'estudante-matricula' ec.estudante.pk %}" class="btn btn-sm btn-primary">
-                            <i class="bi bi-arrow-repeat me-1"></i>Reinskrisaun
+                        {% if ec.suggested_classe %}
+                        <a href="{% url 'estudante-matricula' ec.estudante.pk %}?classe={{ ec.suggested_classe.id }}&departamentu={{ ec.departamentu_id }}&turma={{ ec.turma_id }}"
+                           class="btn btn-sm btn-primary">
+                            <i class="bi bi-arrow-repeat me-1"></i>Reinskrisaun ba {{ ec.suggested_classe }}
                         </a>
+                        {% elif ec.is_passa %}
+                        <form method="post" action="{% url 'estudante-alumni-create' ec.estudante.pk %}" class="d-inline"
+                              onsubmit="return confirm('Hatama {{ ec.estudante.nome }} ba Alumni?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-secondary">
+                                <i class="bi bi-mortarboard me-1"></i>Hatama ba Alumni
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="text-muted small">Seidauk passa — labele reinskrisaun</span>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

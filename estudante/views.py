@@ -10,7 +10,7 @@ from .forms import EstudanteForm, EstudanteClasseForm, EstudanteTransferForm
 
 @not_teacher_required
 def estudante_list_view(request):
-    qs = Estudante.objects.filter(is_delete=False)
+    qs = Estudante.objects.filter(is_delete=False, is_active=True)
     q = request.GET.get('q', '').strip()
     if q:
         qs = qs.filter(Q(nome__icontains=q) | Q(emis__icontains=q))
@@ -129,7 +129,11 @@ def estudante_matricula_create_view(request, pk):
             messages.success(request, 'Matrikula rejistadu ho susesu.')
             return redirect('estudante-detail', pk=pk)
     else:
-        form = EstudanteClasseForm()
+        initial = {
+            k: v for k, v in request.GET.items()
+            if k in ('classe', 'departamentu', 'turma') and v
+        }
+        form = EstudanteClasseForm(initial=initial)
     return render(request, 'estudante/estudanteClasse/form.html', {'form': form, 'estudante': estudante})
 
 
@@ -187,17 +191,33 @@ def estudante_passa_list_view(request):
 @not_teacher_required
 def estudante_reinskrisaun_list_view(request):
     active_ano = Ano.objects.filter(is_active=True).first()
-    last_ano = Ano.objects.filter(is_active=False).order_by('-ano').first()
+    last_ano = None
+    if active_ano:
+        last_ano = Ano.objects.filter(
+            is_active=False, ano__lt=active_ano.ano,
+        ).order_by('-ano').first()
 
-    candidates = EstudanteClasse.objects.none()
+    candidates = []
     if active_ano and last_ano:
-        candidates = EstudanteClasse.objects.filter(
+        classe_order = list(Classe.objects.order_by('classe'))
+        next_classe_map = {
+            classe_order[i].id: classe_order[i + 1]
+            for i in range(len(classe_order) - 1)
+        }
+        candidates = list(EstudanteClasse.objects.filter(
             ano=last_ano, estudante__is_active=True, estudante__is_delete=False,
         ).exclude(
             estudante__estudanteclasse__ano=active_ano,
         ).select_related('estudante', 'classe', 'turma', 'departamentu').order_by(
             'classe__classe', 'turma__turma', 'estudante__nome'
-        )
+        ))
+        for ec in candidates:
+            if ec.is_passa:
+                # passed -> advance to next grade; None if already at the final grade (-> alumni)
+                ec.suggested_classe = next_classe_map.get(ec.classe_id)
+            else:
+                # not passed (False/None) -> repeat the same grade
+                ec.suggested_classe = ec.classe
 
     return render(request, 'estudante/estudanteReinskrisaun/list.html', {
         'candidates': candidates,
