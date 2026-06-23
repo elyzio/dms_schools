@@ -1,5 +1,5 @@
 {% extends 'main/base.html' %}
-{% load role_tags %}
+{% load static role_tags %}
 
 {% block title %}Valor — {{ estudante.nome }} — SI Schools{% endblock %}
 
@@ -123,7 +123,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="{% static 'assets/chartjs/js/chart.umd.min.js' %}"></script>
 <script>
 (function () {
     'use strict';
