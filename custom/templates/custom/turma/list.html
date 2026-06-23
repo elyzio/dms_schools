@@ -1,0 +1,59 @@
+{% extends 'main/base.html' %}
+{% load role_tags %}
+
+{% block title %}Turma — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Turma</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-people me-2"></i>Turma</h5>
+    {% if request.user|is_admin %}
+    <a href="{% url 'turma-create' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Aumenta Turma
+    </a>
+    {% endif %}
+</div>
+
+<div class="card table-card">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Turma</th>
+                    {% if request.user|is_admin %}<th class="text-end">Aksaun</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in turmas %}
+                <tr>
+                    <td class="fw-semibold">{{ t.turma }}</td>
+                    {% if request.user|is_admin %}
+                    <td class="text-end">
+                        <a href="{% url 'turma-update' t.pk %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="post" action="{% url 'turma-delete' t.pk %}" class="d-inline"
+                              onsubmit="return confirm('Ita boot iha serteza atu hamoos turma {{ t.turma }}?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if request.user|is_admin %}2{% else %}1{% endif %}" class="text-center text-muted py-4">
+                        Seidauk iha turma rejistadu.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

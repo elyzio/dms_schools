@@ -95,6 +95,52 @@
                 </li>
             </ul>
         </li>
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center justify-content-between {% if 'custom' in request.path %}active{% endif %}"
+               href="#configSubmenuMobile" data-bs-toggle="collapse" role="button"
+               aria-expanded="{% if 'custom' in request.path %}true{% else %}false{% endif %}">
+                <span><i class="bi bi-sliders"></i>Configuracao</span>
+                <i class="bi bi-chevron-down small submenu-caret"></i>
+            </a>
+            <ul class="collapse nav flex-column submenu {% if 'custom' in request.path %}show{% endif %}" id="configSubmenuMobile">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'ano-list' %}active{% endif %}"
+                       href="{% url 'ano-list' %}">
+                        <i class="bi bi-dot"></i>Ano Akademiku
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'periodo-list' %}active{% endif %}"
+                       href="{% url 'periodo-list' %}">
+                        <i class="bi bi-dot"></i>Periodo
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'departamento-list' %}active{% endif %}"
+                       href="{% url 'departamento-list' %}">
+                        <i class="bi bi-dot"></i>Departamentu
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'classe-list' %}active{% endif %}"
+                       href="{% url 'classe-list' %}">
+                        <i class="bi bi-dot"></i>Klase
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'turma-list' %}active{% endif %}"
+                       href="{% url 'turma-list' %}">
+                        <i class="bi bi-dot"></i>Turma
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'materia-list' %}active{% endif %}"
+                       href="{% url 'materia-list' %}">
+                        <i class="bi bi-dot"></i>Materia
+                    </a>
+                </li>
+            </ul>
+        </li>
         {% endif %}
         <li class="nav-item">
             <small class="mobile-menu-section">Relatóriu</small>
@@ -255,6 +301,52 @@
                     <a class="nav-link {% if request.resolver_match.url_name == 'horas-list' %}active{% endif %}"
                        href="{% url 'horas-list' %}">
                         <i class="bi bi-dot"></i>Oras
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center justify-content-between {% if 'custom' in request.path %}active{% endif %}"
+               href="#configSubmenuDesktop" data-bs-toggle="collapse" role="button"
+               aria-expanded="{% if 'custom' in request.path %}true{% else %}false{% endif %}">
+                <span><i class="bi bi-sliders"></i>Konfigurasaun</span>
+                <i class="bi bi-chevron-down small submenu-caret"></i>
+            </a>
+            <ul class="collapse nav flex-column submenu {% if 'custom' in request.path %}show{% endif %}" id="configSubmenuDesktop">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'ano-list' %}active{% endif %}"
+                       href="{% url 'ano-list' %}">
+                        <i class="bi bi-dot"></i>Ano Akademiku
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'periodo-list' %}active{% endif %}"
+                       href="{% url 'periodo-list' %}">
+                        <i class="bi bi-dot"></i>Periodo
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'departamento-list' %}active{% endif %}"
+                       href="{% url 'departamento-list' %}">
+                        <i class="bi bi-dot"></i>Departamentu
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'classe-list' %}active{% endif %}"
+                       href="{% url 'classe-list' %}">
+                        <i class="bi bi-dot"></i>Klase
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'turma-list' %}active{% endif %}"
+                       href="{% url 'turma-list' %}">
+                        <i class="bi bi-dot"></i>Turma
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'materia-list' %}active{% endif %}"
+                       href="{% url 'materia-list' %}">
+                        <i class="bi bi-dot"></i>Materia
                     </a>
                 </li>
             </ul>

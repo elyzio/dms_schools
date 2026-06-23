@@ -1,0 +1,63 @@
+{% extends 'main/base.html' %}
+{% load role_tags %}
+
+{% block title %}Materia — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Materia</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-journal-text me-2"></i>Materia</h5>
+    {% if request.user|is_admin %}
+    <a href="{% url 'materia-create' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Aumenta Materia
+    </a>
+    {% endif %}
+</div>
+
+<div class="card table-card">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Codigo</th>
+                    <th>Materia</th>
+                    <th>Departamentu</th>
+                    {% if request.user|is_admin %}<th class="text-end">Aksaun</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in materias %}
+                <tr>
+                    <td class="font-monospace fw-semibold">{{ m.codigo }}</td>
+                    <td>{{ m.materia }}</td>
+                    <td>{{ m.departamentu|default:"Jerál" }}</td>
+                    {% if request.user|is_admin %}
+                    <td class="text-end">
+                        <a href="{% url 'materia-update' m.pk %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="post" action="{% url 'materia-delete' m.pk %}" class="d-inline"
+                              onsubmit="return confirm('Ita boot iha serteza atu hamoos materia {{ m.materia }}?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if request.user|is_admin %}4{% else %}3{% endif %}" class="text-center text-muted py-4">
+                        Seidauk iha materia rejistadu.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 
-from .models import Subdistrito, Suco, Aldeia
+from ..models import Subdistrito, Suco, Aldeia
 
 
 def ajax_load_subdistritos(request):

@@ -1,0 +1,67 @@
+{% extends 'main/base.html' %}
+{% load role_tags %}
+
+{% block title %}Periodo — SI Schools{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Periodo</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-calendar-range me-2"></i>Periodo</h5>
+    {% if request.user|is_admin %}
+    <a href="{% url 'periodo-create' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Aumenta Periodo
+    </a>
+    {% endif %}
+</div>
+
+<div class="card table-card">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Periodo</th>
+                    <th>Ativu</th>
+                    {% if request.user|is_admin %}<th class="text-end">Aksaun</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in periodos %}
+                <tr>
+                    <td class="fw-semibold">{{ p.periodo }}</td>
+                    <td>
+                        {% if p.is_active %}
+                        <span class="badge bg-success">Ativu</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inativu</span>
+                        {% endif %}
+                    </td>
+                    {% if request.user|is_admin %}
+                    <td class="text-end">
+                        <a href="{% url 'periodo-update' p.pk %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="post" action="{% url 'periodo-delete' p.pk %}" class="d-inline"
+                              onsubmit="return confirm('Ita boot iha serteza atu hamoos periodo {{ p.periodo }}?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if request.user|is_admin %}3{% else %}2{% endif %}" class="text-center text-muted py-4">
+                        Seidauk iha periodo rejistadu.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
